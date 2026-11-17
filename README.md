@@ -4,96 +4,107 @@
 
 RetroDeck is an in-development desktop application designed to organize and launch a personal retro-game library from one controller-friendly interface. The target platform is Raspberry Pi OS on Raspberry Pi 5.
 
-> **Current status: Stage 1 UI prototype.** The interface now has a console-inspired layout, Home, Library, Systems, Search, and Settings pages, dark/light themes, sample game tiles, and basic keyboard shortcuts. The games are sample entries. ROM discovery, real artwork, emulator launching, persistent data, and controller input are not implemented yet.
+> **Current status: Stage 2 library foundation.** RetroDeck now has a working PySide6 desktop interface, configurable ROM folders, recursive game-file discovery, system grouping, search/filtering, and locally saved settings. Emulator launching, controller input, cover artwork, favorites, and play history are not implemented yet.
 
-## Vision
+## Current features
 
-Create a polished, console-inspired launcher that makes a Raspberry Pi feel like a dedicated retro-gaming system, while remaining a normal Linux desktop application underneath.
+- Home, Library, Systems, Search, and Settings pages
+- Dark and light themes, with the selected theme saved locally
+- Add and remove ROM folders from Settings
+- Recursively scan configured folders without moving or modifying game files
+- Detect supported file extensions and group games by system
+- Search/filter the detected library by title, system, or path
+- Folder settings saved locally in the user's RetroDeck configuration directory
+- Keyboard shortcuts: Ctrl+1 Home, Ctrl+2 Library, Ctrl+3 Systems, Ctrl+4 Search, Ctrl+5 Settings, F5 rescan
 
-## Current interface
+## Supported file extensions
 
-- Wide-screen layout with a dedicated navigation sidebar
-- Home dashboard with featured area and sample game cards
-- Library page with basic filtering of sample entries
-- Systems page with sample console categories
-- Search page for sample data
-- Settings page with dark/light theme toggle
-- Keyboard shortcuts: `Ctrl+1` Home, `Ctrl+2` Library, `Ctrl+3` Systems, `Ctrl+4` Search, `Ctrl+5` Settings
+| System | Extensions |
+| --- | --- |
+| Nintendo 64 | .z64, .n64, .v64 |
+| Nintendo GameCube | .gcm, .gcz, .iso |
+| Nintendo Wii | .wbfs |
+| GameCube / Wii disc images | .rvz, .wia |
+| Nintendo Entertainment System | .nes |
+| Super Nintendo | .sfc, .smc |
+| Game Boy | .gb, .gbc |
+| Game Boy Advance | .gba |
+| Nintendo DS | .nds |
+| PlayStation Portable | .cso |
 
-The visual design uses original RetroDeck styling and placeholder artwork. It does not use Nintendo interface assets.
+This is a file-discovery list, not a guarantee that an emulator is installed or can launch every format. More formats and per-folder system overrides can be added later. Generic .bin files are deliberately excluded because they are often companion files rather than standalone games.
+
+## Run on Raspberry Pi OS
+
+On a Debian 13 / Raspberry Pi OS installation where the PySide6 system package is available:
+
+~~~bash
+sudo apt update
+sudo apt install python3-pyside6.qtwidgets
+cd ~/RetroDeck
+python3 main.py
+~~~
+
+If you have not cloned the repository yet:
+
+~~~bash
+git clone https://github.com/cadenklavon/RetroDeck.git
+cd RetroDeck
+~~~
 
 ## Planned experience
 
-- Automatic discovery of ROM files in user-selected folders
-- Game details, local cover art, and metadata
-- Favorites and recently played history
+- Configurable emulator profiles and launch commands
 - Keyboard, mouse, and Xbox-controller navigation
-- Configurable emulator commands per system or game
-- Local SQLite database for library metadata and settings
+- Local cover art and game metadata
+- Favorites and recently played history
+- SQLite persistence for library metadata and play history
+- Backup/export of settings
 
-## Planned architecture
+## Architecture
 
-| Layer | Planned technology |
+| Layer | Technology |
 | --- | --- |
 | Desktop UI | Python + PySide6 |
-| Local data | SQLite |
+| ROM discovery | Python pathlib |
+| Local preferences | JSON in the user's config directory |
+| Planned library database | SQLite |
 | Emulator integration | Launch configured external emulator processes |
-| Game discovery | Scanning user-selected ROM directories |
 | Target hardware | Raspberry Pi 5 |
 | Target OS | Raspberry Pi OS |
 
-RetroDeck is intended to launch standalone emulators directly. It will not require RetroArch as its central runtime. For example, users could configure Mupen64Plus for Nintendo 64 titles and Dolphin for GameCube/Wii titles, provided those emulators are installed and compatible with the device.
-
-## Run the prototype
-
-Install Python 3, then install the dependency:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python main.py
-```
-
-If creating a virtual environment fails because the venv package is missing, install it with:
-
-```bash
-sudo apt update
-sudo apt install python3-venv
-```
+RetroDeck is intended to launch standalone emulators directly. It will not require RetroArch as its central runtime. Example targets include Mupen64Plus for Nintendo 64 and Dolphin for GameCube/Wii, subject to installation and hardware compatibility.
 
 ## Repository layout
 
-```text
+~~~text
 RetroDeck/
-├── assets/
-│   └── covers/
+├── app/
+│   ├── config/
+│   │   └── settings.py
+│   └── library/
+│       └── scanner.py
 ├── docs/
 │   └── ROADMAP.md
-├── .gitignore
-├── CODEX_HANDOFF.md
+├── tests/
+│   └── test_scanner.py
 ├── main.py
-├── README.md
-└── requirements.txt
-```
+├── requirements.txt
+└── README.md
+~~~
 
 ## Development principles
 
 1. Keep the app usable with a controller, keyboard, and mouse.
-2. Keep emulator integration modular. The launcher should not depend on one emulator frontend.
+2. Keep emulator integration modular and independent of one frontend.
 3. Do not bundle copyrighted game ROMs, BIOS files, or commercial artwork.
 4. Store user data locally and make ROM folders configurable.
-5. Build and test for Raspberry Pi OS compatibility, not just Windows development machines.
+5. Build and test for Raspberry Pi OS compatibility.
 6. Clearly distinguish working features from planned features.
 
 ## Roadmap
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for planned milestones.
-
-## Contributing / feedback
-
-This is a personal learning project under active development. Suggestions and bug reports are welcome through GitHub Issues.
+See docs/ROADMAP.md for planned milestones.
 
 ## License
 
