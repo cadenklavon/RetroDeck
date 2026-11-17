@@ -51,6 +51,12 @@ def emulator_candidates(emulator_id, configured_path=None, root=None):
         yield base / "emulators" / "bin" / platform_name / architecture / name
     for name in names:
         yield base / "emulators" / "bin" / platform_name / name
+    if platform_name == "linux":
+        # Debian and Raspberry Pi OS place game applications in /usr/games,
+        # which is not guaranteed to be included in a desktop PATH.
+        for directory in ("/usr/games", "/usr/bin", "/usr/local/bin"):
+            for name in names:
+                yield Path(directory) / name
     for name in names:
         located = shutil.which(name)
         if located:
