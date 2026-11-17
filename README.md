@@ -135,3 +135,13 @@ See docs/ROADMAP.md for planned milestones.
 ## License
 
 No license has been selected for RetroDeck's own code yet. Until one is added, all rights are reserved by the author. Third-party emulator projects retain their own licenses.
+
+
+## Emulator setup on Raspberry Pi OS
+
+The Emulators page can install the currently supported standalone packages
+from Debian-family ARM64 repositories after you confirm the operating-system
+authorization prompt. The initial package set is Dolphin, mGBA, and Nestopia.
+RetroDeck discovers Debian game applications in `/usr/games` as well as
+standard executable folders. Nintendo 64 still needs a separately validated
+ARM64 Mupen64Plus build and is not falsely marked as installable yet.
