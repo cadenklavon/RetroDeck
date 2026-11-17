@@ -1,7 +1,7 @@
 """RetroDeck desktop launcher.
 
-Stage 2 adds real ROM-folder configuration and local game-file discovery.
-The scanner only reads filenames and paths. It never modifies game files.
+Stage 3 adds the standalone emulator catalog, executable discovery, and game launching.
+The ROM scanner only reads filenames and paths. It never modifies game files.
 """
 import sys
 
