@@ -15,6 +15,21 @@ def current_platform():
     return platform.system().lower()
 
 
+def current_architecture():
+    """Return a normalized architecture name for package and bundle lookup."""
+    machine = platform.machine().lower()
+    aliases = {
+        "aarch64": "arm64",
+        "arm64": "arm64",
+        "x86_64": "x86_64",
+        "amd64": "x86_64",
+        "i386": "x86",
+        "i686": "x86",
+        "armv7l": "armhf",
+    }
+    return aliases.get(machine, machine or "unknown")
+
+
 def project_root():
     return Path(__file__).resolve().parents[2]
 
@@ -23,12 +38,19 @@ def emulator_candidates(emulator_id, configured_path=None, root=None):
     profile = EMULATOR_CATALOG.get(emulator_id)
     if profile is None:
         return
-    names = profile["executables"].get(current_platform(), [])
+    platform_name = current_platform()
+    names = profile["executables"].get(platform_name, [])
     if configured_path:
         yield Path(configured_path).expanduser()
     base = Path(root) if root is not None else project_root()
+
+    # New releases use an architecture-specific folder. Keep the old
+    # platform-only location as a compatibility fallback for existing builds.
+    architecture = current_architecture()
     for name in names:
-        yield base / "emulators" / "bin" / current_platform() / name
+        yield base / "emulators" / "bin" / platform_name / architecture / name
+    for name in names:
+        yield base / "emulators" / "bin" / platform_name / name
     for name in names:
         located = shutil.which(name)
         if located:
