@@ -1,7 +1,7 @@
 """Metadata for standalone emulator integrations.
 
-This catalog describes candidates. It does not download, install, or redistribute
-third-party software. Redistribution approval is tracked in the packaging docs.
+The catalog distinguishes emulator candidates from packages verified for a
+specific operating system. A system package is not a RetroDeck-bundled binary.
 """
 EMULATOR_CATALOG = {
     "mupen64plus": {
@@ -19,6 +19,7 @@ EMULATOR_CATALOG = {
         "license_status": "source-and-notice-review-required",
         "executables": {"linux": ["dolphin-emu", "dolphin"], "windows": ["Dolphin.exe"]},
         "arguments": ["-e", "{rom}"],
+        "debian_arm64_packages": ["dolphin-emu"],
     },
     "nestopia": {
         "name": "Nestopia", "systems": ["Nintendo Entertainment System"],
@@ -27,6 +28,7 @@ EMULATOR_CATALOG = {
         "license_status": "review-required",
         "executables": {"linux": ["nestopia"], "windows": ["nestopia.exe"]},
         "arguments": ["{rom}"],
+        "debian_arm64_packages": ["nestopia"],
     },
     "bsnes": {
         "name": "bsnes", "systems": ["Super Nintendo"],
@@ -45,18 +47,19 @@ EMULATOR_CATALOG = {
         "arguments": ["{rom}"],
     },
     "mgba": {
-        "name": "mGBA", "systems": ["Game Boy Advance"],
+        "name": "mGBA", "systems": ["Game Boy", "Game Boy Color", "Game Boy Advance"],
         "project_url": "https://github.com/mgba-emu/mgba",
         "license": "MPL-2.0",
         "license_status": "source-and-notice-review-required",
-        "executables": {"linux": ["mgba"], "windows": ["mGBA.exe"]},
+        "executables": {"linux": ["mgba", "mgba-qt"], "windows": ["mGBA.exe"]},
         "arguments": ["{rom}"],
+        "debian_arm64_packages": ["mgba-qt"],
     },
     "melonds": {
         "name": "melonDS", "systems": ["Nintendo DS"],
         "project_url": "https://github.com/melonDS-emu/melonDS",
         "license": "GPL-3.0-or-later",
-        "license_status": "source-and-notice-review-required",
+        "license_status": "review-required",
         "executables": {"linux": ["melonDS"], "windows": ["melonDS.exe"]},
         "arguments": ["{rom}"],
     },
@@ -64,7 +67,7 @@ EMULATOR_CATALOG = {
         "name": "PPSSPP", "systems": ["PlayStation Portable"],
         "project_url": "https://github.com/hrydgard/ppsspp",
         "license": "GPL-2.0-or-later",
-        "license_status": "source-and-notice-review-required",
+        "license_status": "review-required",
         "executables": {"linux": ["PPSSPP"], "windows": ["PPSSPPWindows64.exe", "PPSSPPWindows.exe"]},
         "arguments": ["{rom}"],
     },
