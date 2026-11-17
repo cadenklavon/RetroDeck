@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 
 from app.config.settings import load_settings, save_settings
 from app.library.scanner import scan_rom_directories
+from app.emulators.launcher import EmulatorLaunchError, launch_game
 
 
 DARK_THEME = """
@@ -185,11 +186,16 @@ class RetroDeckWindow(QMainWindow):
         scan = QPushButton("Scan folders")
         scan.setObjectName("PrimaryButton")
         scan.clicked.connect(self.refresh_library)
+        launch = QPushButton("Launch selected game")
+        launch.setObjectName("SecondaryButton")
+        launch.clicked.connect(self.launch_selected_game)
         row.addWidget(self.library_search, 1)
         row.addWidget(scan)
+        row.addWidget(launch)
         layout.addLayout(row)
         self.library_list = QListWidget()
         self.library_list.setSpacing(2)
+        self.library_list.itemDoubleClicked.connect(lambda item: self.launch_selected_game())
         layout.addWidget(self.library_list, 1)
         self.library_status = QLabel("No scan performed yet.")
         self.library_status.setObjectName("Muted")
@@ -324,9 +330,28 @@ class RetroDeckWindow(QMainWindow):
             searchable = f"{game.title} {game.system} {game.path}".casefold()
             if query and query not in searchable:
                 continue
-            self.library_list.addItem(QListWidgetItem(self.game_display_text(game)))
+            item = QListWidgetItem(self.game_display_text(game))
+            item.setData(Qt.ItemDataRole.UserRole, str(game.path))
+            self.library_list.addItem(item)
         if self.library_list.count() == 0:
             self.library_list.addItem(QListWidgetItem("No games found. Add a ROM folder in Settings, then scan again."))
+
+    def launch_selected_game(self):
+        item = self.library_list.currentItem()
+        if item is None:
+            QMessageBox.information(self, "Choose a game", "Select a game in your library first.")
+            return
+        game_path = item.data(Qt.ItemDataRole.UserRole)
+        game = next((entry for entry in self.games if str(entry.path) == game_path), None)
+        if game is None:
+            QMessageBox.warning(self, "Game unavailable", "Rescan your library and select the game again.")
+            return
+        try:
+            process = launch_game(game, self.settings)
+            self.library_status.setText(f"Started {game.title} in its configured emulator.")
+            self.last_emulator_process = process
+        except EmulatorLaunchError as exc:
+            QMessageBox.warning(self, "Could not launch game", str(exc))
 
     def populate_search(self):
         if not hasattr(self, "search_results"):
