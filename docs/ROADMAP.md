@@ -25,13 +25,24 @@ Items are marked complete only when implemented. Raspberry Pi hardware validatio
 - [ ] Favorites and recently played
 - [ ] Handle multi-disc games and per-folder system overrides
 
-## Stage 3: Emulator integration
-- [ ] Define configurable emulator profiles
-- [ ] Allow executable path and launch arguments to be configured
-- [ ] Launch a selected game in an external emulator
-- [ ] Report missing emulator paths and launch errors
-- [ ] Support per-system defaults and optional per-game overrides
-- [ ] Test Mupen64Plus and Dolphin on Raspberry Pi OS
+## Stage 3: Emulator integration and packaging
+- [x] Create a central catalog of standalone emulator candidates
+- [x] Define default emulator mappings for detected systems
+- [x] Search configured paths, RetroDeck's bundled-emulator folder, and system PATH
+- [x] Add a modular process launcher with configurable argument templates
+- [x] Add unit tests for executable discovery and launch command construction
+- [x] Document the platform-specific packaging and first-run installation design
+- [x] Start third-party license and redistribution tracking
+- [ ] Select exact standalone emulator releases for each supported system
+- [ ] Verify licenses, bundled dependencies, notices, and source obligations for every selected build
+- [ ] Build and test Mupen64Plus for Raspberry Pi OS ARM64
+- [ ] Build and test Dolphin for Raspberry Pi OS ARM64
+- [ ] Select and validate standalone NES, SNES, Game Boy, GBA, DS, and PSP emulators
+- [ ] Create reproducible ARM64 build scripts and release assets
+- [ ] Add a signed/versioned package manifest and SHA-256 verification
+- [ ] Add first-run install, repair, and update flow
+- [ ] Connect selected games in the UI to the emulator launcher
+- [ ] Test real games and report missing firmware or runtime dependencies
 
 ## Stage 4: Controller support
 - [ ] Detect connected game controllers
@@ -55,4 +66,4 @@ Items are marked complete only when implemented. Raspberry Pi hardware validatio
 - [ ] Add automated tests and basic CI
 - [ ] Test performance and usability on Raspberry Pi 5
 - [ ] Add screenshots of the real application
-- [ ] Choose and add an open-source license, if desired
+- [ ] Choose and add an open-source license for RetroDeck, if desired
