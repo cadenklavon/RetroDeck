@@ -13,3 +13,7 @@ dist/
 *.sqlite3
 .DS_Store
 Thumbs.db
+
+# Keep the ROMs folder placeholder, but never commit personal game files.
+ROMs/*
+!ROMs/.gitkeep
