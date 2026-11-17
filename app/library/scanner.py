@@ -27,6 +27,10 @@ for _system, _extensions in SYSTEM_EXTENSIONS.items():
         # the user later adds a per-folder or per-game system override.
         EXTENSION_TO_SYSTEM.setdefault(_extension, _system)
 
+# These disc-image formats can contain either GameCube or Wii games.
+EXTENSION_TO_SYSTEM[".rvz"] = "GameCube / Wii"
+EXTENSION_TO_SYSTEM[".wia"] = "GameCube / Wii"
+
 
 @dataclass(frozen=True)
 class Game:
