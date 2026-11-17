@@ -4,8 +4,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.emulators.catalog import SYSTEM_DEFAULTS
+from app.emulators.installer import package_install_command, supported_package_plan
 from app.emulators.launcher import EmulatorLaunchError, launch_game
-from app.emulators.manager import emulator_status, resolve_emulator
+from app.emulators.manager import (
+    current_architecture, emulator_status, resolve_emulator,
+)
 from app.library.scanner import Game
 
 
@@ -13,11 +16,23 @@ class EmulatorManagerTests(unittest.TestCase):
     def test_finds_bundled_linux_executable(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
+            executable = root / "emulators" / "bin" / "linux" / "arm64" / "mupen64plus"
+            executable.parent.mkdir(parents=True)
+            executable.write_text("#!/bin/sh\\n", encoding="utf-8")
+            with patch("app.emulators.manager.current_platform", return_value="linux"):
+                with patch("app.emulators.manager.current_architecture", return_value="arm64"):
+                    found = resolve_emulator("mupen64plus", root=root)
+            self.assertEqual(found, executable.resolve())
+
+    def test_legacy_bundle_path_still_works(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
             executable = root / "emulators" / "bin" / "linux" / "mupen64plus"
             executable.parent.mkdir(parents=True)
-            executable.write_text("#!/bin/sh\n", encoding="utf-8")
+            executable.write_text("#!/bin/sh\\n", encoding="utf-8")
             with patch("app.emulators.manager.current_platform", return_value="linux"):
-                found = resolve_emulator("mupen64plus", root=root)
+                with patch("app.emulators.manager.current_architecture", return_value="arm64"):
+                    found = resolve_emulator("mupen64plus", root=root)
             self.assertEqual(found, executable.resolve())
 
     def test_unknown_emulator_is_not_available(self):
@@ -26,12 +41,16 @@ class EmulatorManagerTests(unittest.TestCase):
     def test_n64_has_default_emulator(self):
         self.assertEqual(SYSTEM_DEFAULTS["Nintendo 64"], "mupen64plus")
 
+    def test_mgba_is_default_for_game_boy_color_and_advance(self):
+        self.assertEqual(SYSTEM_DEFAULTS["Game Boy Color"], "mgba")
+        self.assertEqual(SYSTEM_DEFAULTS["Game Boy Advance"], "mgba")
+
     def test_launcher_builds_expected_process_command(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            executable = root / "emulators" / "bin" / "linux" / "mupen64plus"
+            executable = root / "emulators" / "bin" / "linux" / "arm64" / "mupen64plus"
             executable.parent.mkdir(parents=True)
-            executable.write_text("#!/bin/sh\n", encoding="utf-8")
+            executable.write_text("#!/bin/sh\\n", encoding="utf-8")
             rom = root / "Ocarina of Time.z64"
             rom.write_bytes(b"test")
             game = Game("Ocarina of Time", "Nintendo 64", rom)
@@ -42,7 +61,8 @@ class EmulatorManagerTests(unittest.TestCase):
                 return "process"
 
             with patch("app.emulators.manager.current_platform", return_value="linux"):
-                process = launch_game(game, {}, popen=fake_popen, root=root)
+                with patch("app.emulators.manager.current_architecture", return_value="arm64"):
+                    process = launch_game(game, {}, popen=fake_popen, root=root)
             self.assertEqual(process, "process")
             self.assertEqual(calls[0][0], [str(executable.resolve()), str(rom.resolve())])
 
@@ -55,6 +75,27 @@ class EmulatorManagerTests(unittest.TestCase):
                 with patch("app.emulators.manager.shutil.which", return_value=None):
                     with self.assertRaises(EmulatorLaunchError):
                         launch_game(game, {}, root=temporary)
+
+    def test_pi_os_arm64_package_plan(self):
+        plan = supported_package_plan("Linux", "aarch64", True)
+        self.assertIn("dolphin", plan)
+        self.assertIn("mgba", plan)
+        self.assertIn("nestopia", plan)
+        self.assertNotIn("mupen64plus", plan)
+
+    def test_package_plan_rejects_unsupported_architecture(self):
+        self.assertEqual(supported_package_plan("Linux", "x86_64", True), {})
+
+    def test_package_plan_rejects_non_debian_os(self):
+        self.assertEqual(supported_package_plan("Linux", "aarch64", False), {})
+
+    def test_install_command_is_argument_list_and_rejects_bad_names(self):
+        self.assertEqual(
+            package_install_command(["dolphin-emu", "mgba-qt"]),
+            ["pkexec", "apt-get", "install", "-y", "dolphin-emu", "mgba-qt"],
+        )
+        with self.assertRaises(ValueError):
+            package_install_command(["dolphin-emu; rm -rf /"])
 
 
 if __name__ == "__main__":
