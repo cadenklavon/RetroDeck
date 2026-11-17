@@ -280,6 +280,7 @@ class RetroDeckWindow(QMainWindow):
         folder = str(__import__("pathlib").Path(folder).expanduser().resolve())
         if folder not in self.settings["rom_directories"]:
             self.settings["rom_directories"].append(folder)
+            self.settings["rom_directories_configured"] = True
             self.persist_settings()
             self.populate_folder_list()
             self.refresh_library()
@@ -291,6 +292,7 @@ class RetroDeckWindow(QMainWindow):
             return
         folder = item.text()
         self.settings["rom_directories"] = [entry for entry in self.settings["rom_directories"] if entry != folder]
+        self.settings["rom_directories_configured"] = True
         self.persist_settings()
         self.populate_folder_list()
         self.refresh_library()
