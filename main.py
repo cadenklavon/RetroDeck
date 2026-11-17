@@ -5,7 +5,7 @@ The ROM scanner only reads filenames and paths. It never modifies game files.
 """
 import sys
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QProcess, Qt
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication, QFileDialog, QFrame, QHBoxLayout, QLabel, QListWidget,
@@ -15,7 +15,10 @@ from PySide6.QtWidgets import (
 
 from app.config.settings import load_settings, save_settings
 from app.library.scanner import scan_rom_directories
+from app.emulators.catalog import EMULATOR_CATALOG
+from app.emulators.installer import package_install_command, supported_package_plan
 from app.emulators.launcher import EmulatorLaunchError, launch_game
+from app.emulators.manager import emulator_status
 
 
 DARK_THEME = """
@@ -66,7 +69,7 @@ QPushButton:focus, QLineEdit:focus, QListWidget:focus { border: 2px solid #087da
 
 
 class RetroDeckWindow(QMainWindow):
-    PAGES = ["Home", "Library", "Systems", "Search", "Settings"]
+    PAGES = ["Home", "Library", "Systems", "Search", "Emulators", "Settings"]
 
     def __init__(self):
         super().__init__()
@@ -94,6 +97,7 @@ class RetroDeckWindow(QMainWindow):
         self.pages.addWidget(self.build_library_page())
         self.pages.addWidget(self.build_systems_page())
         self.pages.addWidget(self.build_search_page())
+        self.pages.addWidget(self.build_emulators_page())
         self.pages.addWidget(self.build_settings_page())
         content.addWidget(self.pages, 1)
         shell.addLayout(content, 1)
@@ -118,7 +122,7 @@ class RetroDeckWindow(QMainWindow):
         caption.setObjectName("Eyebrow")
         caption.setContentsMargins(5, 18, 0, 8)
         layout.addWidget(caption)
-        for icon, name in [("⌂", "Home"), ("▦", "Library"), ("◈", "Systems"), ("⌕", "Search")]:
+        for icon, name in [("⌂", "Home"), ("▦", "Library"), ("◈", "Systems"), ("⌕", "Search"), ("⬇", "Emulators")]:
             button = QPushButton(f"{icon}    {name}")
             button.setObjectName("NavButton")
             button.setCheckable(True)
@@ -252,6 +256,122 @@ class RetroDeckWindow(QMainWindow):
         layout.addWidget(note)
         self.populate_folder_list()
         return page
+
+    def build_emulators_page(self):
+        page, layout = self.make_page()
+        self.page_heading(
+            layout, "Emulator Setup",
+            "Install supported standalone emulators from your operating system's trusted package repositories.",
+        )
+        self.emulator_status_list = QListWidget()
+        layout.addWidget(self.emulator_status_list, 1)
+
+        self.emulator_setup_status = QLabel(
+            "RetroDeck checks for installed emulators and supported packages."
+        )
+        self.emulator_setup_status.setObjectName("Muted")
+        self.emulator_setup_status.setWordWrap(True)
+        layout.addWidget(self.emulator_setup_status)
+
+        buttons = QHBoxLayout()
+        refresh = QPushButton("Refresh status")
+        refresh.setObjectName("SecondaryButton")
+        refresh.clicked.connect(self.refresh_emulator_status)
+        install = QPushButton("Install supported emulators")
+        install.setObjectName("PrimaryButton")
+        install.clicked.connect(self.install_supported_emulators)
+        buttons.addWidget(refresh)
+        buttons.addWidget(install)
+        buttons.addStretch()
+        layout.addLayout(buttons)
+        self.refresh_emulator_status()
+        return page
+
+    def refresh_emulator_status(self):
+        if not hasattr(self, "emulator_status_list"):
+            return
+        self.emulator_status_list.clear()
+        installed_count = 0
+        for emulator_id, profile in EMULATOR_CATALOG.items():
+            status = emulator_status(emulator_id)
+            if status["available"]:
+                installed_count += 1
+                detail = f"Installed: {status['path']}"
+            else:
+                detail = "Not detected on this computer"
+            self.emulator_status_list.addItem(
+                f"{profile['name']}  |  {', '.join(profile['systems'])}\n{detail}"
+            )
+
+        plan = supported_package_plan()
+        package_count = len({p for packages in plan.values() for p in packages})
+        if plan:
+            self.emulator_setup_status.setText(
+                f"{installed_count} emulator(s) detected. "
+                f"{package_count} supported package(s) can be installed from your system repositories. "
+                "Nintendo 64 still needs a validated native ARM64 Mupen64Plus build."
+            )
+        else:
+            self.emulator_setup_status.setText(
+                f"{installed_count} emulator(s) detected. Automatic package installation "
+                "is currently supported only on Debian-family Linux ARM64 systems."
+            )
+
+    def install_supported_emulators(self):
+        plan = supported_package_plan()
+        packages = sorted({package for group in plan.values() for package in group})
+        if not packages:
+            QMessageBox.information(
+                self, "Not supported on this system",
+                "The automatic installer currently supports Raspberry Pi OS / Debian-family Linux ARM64 only.",
+            )
+            return
+
+        package_text = ", ".join(packages)
+        answer = QMessageBox.question(
+            self,
+            "Install emulators?",
+            "RetroDeck will ask your operating system to install these packages:\n\n"
+            f"{package_text}\n\n"
+            "This changes installed software on this computer. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        self.emulator_install_process = QProcess(self)
+        self.emulator_install_process.finished.connect(self.on_emulator_install_finished)
+        self.emulator_install_process.errorOccurred.connect(self.on_emulator_install_error)
+        self.emulator_install_phase = "update"
+        self.emulator_setup_status.setText("Updating package information. Approve the operating-system prompt.")
+        self.emulator_install_process.start("pkexec", ["apt-get", "update"])
+
+    def on_emulator_install_finished(self, exit_code, exit_status):
+        if exit_code != 0:
+            self.emulator_setup_status.setText(
+                "Package operation did not complete. Check the system prompt and try again."
+            )
+            return
+
+        if self.emulator_install_phase == "update":
+            plan = supported_package_plan()
+            packages = sorted({package for group in plan.values() for package in group})
+            self.emulator_install_phase = "install"
+            self.emulator_setup_status.setText("Installing emulators. Approve the operating-system prompt.")
+            self.emulator_install_process.start(
+                *package_install_command(packages)
+            )
+            return
+
+        self.emulator_setup_status.setText("Package installation finished. Checking emulator executables…")
+        self.refresh_emulator_status()
+
+    def on_emulator_install_error(self, process_error):
+        self.emulator_setup_status.setText(
+            "Could not start the system package manager. Make sure pkexec is installed "
+            "and your desktop session supports authorization."
+        )
 
     def show_page(self, name):
         self.pages.setCurrentIndex(self.PAGES.index(name))
