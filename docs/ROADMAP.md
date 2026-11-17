@@ -1,25 +1,29 @@
 # RetroDeck Development Roadmap
 
-This roadmap describes planned work. Items are not complete until implemented and tested.
+Items are marked complete only when implemented. Raspberry Pi hardware validation is tracked separately from implementation.
 
-## Stage 1: UI design
-- [x] Initial PySide6 window and navigation prototype
-- [x] Home, Library, Systems, Search, and Settings destinations
+## Stage 1: UI foundation
+- [x] PySide6 desktop window and navigation
+- [x] Home, Library, Systems, Search, and Settings pages
 - [x] Dark/light theme toggle
 - [x] Console-inspired wide-screen visual design
-- [x] Sample game tiles and sample-library filtering
-- [x] Basic keyboard shortcuts for page navigation
+- [x] Keyboard shortcuts for page navigation
+- [x] Initial launch confirmed on the user's Raspberry Pi 5
 - [ ] Test layout and readability on the Raspberry Pi 7-inch display and a 16:9 monitor
 - [ ] Refine visual design after testing on actual hardware
 
 ## Stage 2: Game library
-- [ ] Define a game metadata model
-- [ ] Let users configure ROM directories
-- [ ] Scan supported file extensions without moving user files
-- [ ] Group games by system
-- [ ] Search, sort, and filter detected games
+- [x] Define a game metadata model
+- [x] Let users configure ROM directories
+- [x] Scan supported file extensions without moving user files
+- [x] Group detected games by system
+- [x] Search and filter detected games
+- [x] Sort scan results consistently
+- [x] Deduplicate files when folders overlap
+- [x] Report missing or invalid folders
+- [x] Add automated tests for scanner behavior
 - [ ] Favorites and recently played
-- [ ] Handle duplicate filenames and missing files cleanly
+- [ ] Handle multi-disc games and per-folder system overrides
 
 ## Stage 3: Emulator integration
 - [ ] Define configurable emulator profiles
@@ -42,7 +46,7 @@ This roadmap describes planned work. Items are not complete until implemented an
 - [ ] Review terms before adding optional metadata providers
 - [ ] Cache artwork locally
 - [ ] Add SQLite database and schema migrations
-- [ ] Persist library settings, favorites, and play history
+- [ ] Persist favorites and play history
 - [ ] Add backup/export for settings
 
 ## Stage 6: Raspberry Pi testing and release preparation
