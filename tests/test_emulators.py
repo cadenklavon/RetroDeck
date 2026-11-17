@@ -7,7 +7,7 @@ from app.emulators.catalog import SYSTEM_DEFAULTS
 from app.emulators.installer import package_install_command, supported_package_plan
 from app.emulators.launcher import EmulatorLaunchError, launch_game
 from app.emulators.manager import (
-    current_architecture, emulator_status, resolve_emulator,
+    current_architecture, emulator_candidates, emulator_status, resolve_emulator,
 )
 from app.library.scanner import Game
 
@@ -34,6 +34,12 @@ class EmulatorManagerTests(unittest.TestCase):
                 with patch("app.emulators.manager.current_architecture", return_value="arm64"):
                     found = resolve_emulator("mupen64plus", root=root)
             self.assertEqual(found, executable.resolve())
+
+    def test_debian_game_directory_is_checked(self):
+        with patch("app.emulators.manager.current_platform", return_value="linux"):
+            with patch("app.emulators.manager.current_architecture", return_value="arm64"):
+                candidates = list(emulator_candidates("mgba"))
+        self.assertIn(Path("/usr/games/mgba-qt"), candidates)
 
     def test_unknown_emulator_is_not_available(self):
         self.assertFalse(emulator_status("not-real")["available"])
