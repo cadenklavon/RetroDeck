@@ -359,12 +359,11 @@ class RetroDeckWindow(QMainWindow):
 
     def on_emulator_install_output(self):
         process = self.emulator_install_process
-        chunks = []
-        if process.bytesAvailable():
-            chunks.append(bytes(process.readAll()).decode("utf-8", errors="replace"))
-        if not chunks:
+        stdout = bytes(process.readAllStandardOutput()).decode("utf-8", errors="replace")
+        stderr = bytes(process.readAllStandardError()).decode("utf-8", errors="replace")
+        output = stdout + stderr
+        if not output:
             return
-        output = "".join(chunks)
         self.emulator_install_log = (self.emulator_install_log + output)[-5000:]
         lines = [line.strip() for line in self.emulator_install_log.splitlines() if line.strip()]
         latest = lines[-1] if lines else "Working…"
