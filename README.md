@@ -4,22 +4,31 @@
 
 RetroDeck is an in-development desktop application designed to organize and launch a personal retro-game library from one controller-friendly interface. The target platform is Raspberry Pi OS on Raspberry Pi 5.
 
-> **Project status:** Early prototype. The current build is a UI foundation with placeholder game entries. ROM discovery, emulator integration, artwork management, persistence, and controller support are planned, not yet implemented.
+> **Current status: Stage 1 UI prototype.** The interface now has a console-inspired layout, Home, Library, Systems, Search, and Settings pages, dark/light themes, sample game tiles, and basic keyboard shortcuts. The games are sample entries. ROM discovery, real artwork, emulator launching, persistent data, and controller input are not implemented yet.
 
 ## Vision
 
 Create a polished, console-inspired launcher that makes a Raspberry Pi feel like a dedicated retro-gaming system, while remaining a normal Linux desktop application underneath.
 
+## Current interface
+
+- Wide-screen layout with a dedicated navigation sidebar
+- Home dashboard with featured area and sample game cards
+- Library page with basic filtering of sample entries
+- Systems page with sample console categories
+- Search page for sample data
+- Settings page with dark/light theme toggle
+- Keyboard shortcuts: `Ctrl+1` Home, `Ctrl+2` Library, `Ctrl+3` Systems, `Ctrl+4` Search, `Ctrl+5` Settings
+
+The visual design uses original RetroDeck styling and placeholder artwork. It does not use Nintendo interface assets.
+
 ## Planned experience
 
-- Home screen with recently played and favorite games
-- Library organized by console/system
-- Search and filtering
-- Game details with cover art and metadata
+- Automatic discovery of ROM files in user-selected folders
+- Game details, local cover art, and metadata
+- Favorites and recently played history
 - Keyboard, mouse, and Xbox-controller navigation
 - Configurable emulator commands per system or game
-- Automatic discovery of ROM files in user-selected folders
-- Dark and light themes
 - Local SQLite database for library metadata and settings
 
 ## Planned architecture
@@ -76,6 +85,7 @@ RetroDeck/
 3. Do not bundle copyrighted game ROMs, BIOS files, or commercial artwork.
 4. Store user data locally and make ROM folders configurable.
 5. Build and test for Raspberry Pi OS compatibility, not just Windows development machines.
+6. Clearly distinguish working features from planned features.
 
 ## Roadmap
 
