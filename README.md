@@ -2,9 +2,9 @@
 
 **A custom retro-gaming launcher for Raspberry Pi 5.**
 
-RetroDeck is an in-development desktop application designed to organize and launch a personal retro-game library from one controller-friendly interface. The target platform is Raspberry Pi OS on Raspberry Pi 5.
+RetroDeck is an in-development desktop application designed to organize and launch a personal retro-game library from one controller-friendly interface. The first deployment target is 64-bit Raspberry Pi OS on Raspberry Pi 5.
 
-> **Current status: Stage 2 library foundation.** RetroDeck now has a working PySide6 desktop interface, configurable ROM folders, recursive game-file discovery, system grouping, search/filtering, and locally saved settings. Emulator launching, controller input, cover artwork, favorites, and play history are not implemented yet.
+> **Current status: Stage 3 foundation.** RetroDeck has a working PySide6 interface, configurable ROM folders, recursive game discovery, system grouping, search/filtering, local settings, an emulator candidate catalog, executable discovery, and a tested process-launching module. Real emulator packages, automatic installation, controller input, and end-to-end emulator testing are still outstanding.
 
 ## Current features
 
@@ -16,6 +16,9 @@ RetroDeck is an in-development desktop application designed to organize and laun
 - Search/filter the detected library by title, system, or path
 - Folder settings saved locally in the user's RetroDeck configuration directory
 - Keyboard shortcuts: Ctrl+1 Home, Ctrl+2 Library, Ctrl+3 Systems, Ctrl+4 Search, Ctrl+5 Settings, F5 rescan
+- Emulator candidate catalog with upstream project references
+- Executable discovery for configured, RetroDeck-bundled, and system-installed emulators
+- Modular process launcher with configurable argument templates and readable errors
 
 ## Supported file extensions
 
@@ -32,7 +35,7 @@ RetroDeck is an in-development desktop application designed to organize and laun
 | Nintendo DS | .nds |
 | PlayStation Portable | .cso |
 
-This is a file-discovery list, not a guarantee that an emulator is installed or can launch every format. More formats and per-folder system overrides can be added later. Generic .bin files are deliberately excluded because they are often companion files rather than standalone games.
+This is a file-discovery list, not a guarantee that an emulator is installed or can launch every format. Generic .bin files are excluded because they are often companion files rather than standalone games.
 
 ## Run on Raspberry Pi OS
 
@@ -52,9 +55,24 @@ git clone https://github.com/cadenklavon/RetroDeck.git
 cd RetroDeck
 ~~~
 
+## Emulator packaging direction
+
+RetroDeck is designed to launch standalone emulators directly. It will not require RetroArch as its central runtime.
+
+The goal is for users to install RetroDeck and then install compatible emulator packages through a first-run setup screen, without manually finding each emulator. Compiled binaries will be delivered as platform-specific RetroDeck release assets or installed from a versioned, checksum-verified manifest. They will not be committed to the Git source history.
+
+The first packaging target is Raspberry Pi OS 64-bit / ARM64. Windows and other platforms need their own builds. No emulator binaries are bundled yet. Each emulator's license, dependencies, source-code obligations, and redistribution permissions must be checked before packaging.
+
+Candidate standalone emulators include Mupen64Plus (N64), Dolphin (GameCube/Wii), Nestopia (NES), bsnes (SNES), Gambatte (Game Boy/Color), mGBA (GBA), melonDS (DS), and PPSSPP (PSP). These are candidates, not a claim of completed support.
+
+See:
+- docs/EMULATOR_PACKAGING.md for the packaging and first-run installation plan.
+- docs/THIRD_PARTY_LICENSES.md for third-party license tracking.
+
 ## Planned experience
 
-- Configurable emulator profiles and launch commands
+- First-run emulator installation and update manager
+- Per-system emulator selection and per-game overrides
 - Keyboard, mouse, and Xbox-controller navigation
 - Local cover art and game metadata
 - Favorites and recently played history
@@ -69,11 +87,9 @@ cd RetroDeck
 | ROM discovery | Python pathlib |
 | Local preferences | JSON in the user's config directory |
 | Planned library database | SQLite |
-| Emulator integration | Launch configured external emulator processes |
-| Target hardware | Raspberry Pi 5 |
-| Target OS | Raspberry Pi OS |
-
-RetroDeck is intended to launch standalone emulators directly. It will not require RetroArch as its central runtime. Example targets include Mupen64Plus for Nintendo 64 and Dolphin for GameCube/Wii, subject to installation and hardware compatibility.
+| Emulator catalog and discovery | Python modules under app/emulators |
+| Emulator integration | Standalone emulator processes |
+| First release target | Raspberry Pi OS 64-bit on Raspberry Pi 5 |
 
 ## Repository layout
 
@@ -82,12 +98,20 @@ RetroDeck/
 ├── app/
 │   ├── config/
 │   │   └── settings.py
+│   ├── emulators/
+│   │   ├── catalog.py
+│   │   ├── manager.py
+│   │   └── launcher.py
 │   └── library/
 │       └── scanner.py
 ├── docs/
+│   ├── EMULATOR_PACKAGING.md
+│   ├── THIRD_PARTY_LICENSES.md
 │   └── ROADMAP.md
 ├── tests/
+│   ├── test_emulators.py
 │   └── test_scanner.py
+├── ROMs/
 ├── main.py
 ├── requirements.txt
 └── README.md
@@ -97,10 +121,11 @@ RetroDeck/
 
 1. Keep the app usable with a controller, keyboard, and mouse.
 2. Keep emulator integration modular and independent of one frontend.
-3. Do not bundle copyrighted game ROMs, BIOS files, or commercial artwork.
+3. Do not bundle copyrighted game ROMs, BIOS files, firmware, keys, or commercial artwork.
 4. Store user data locally and make ROM folders configurable.
 5. Build and test for Raspberry Pi OS compatibility.
 6. Clearly distinguish working features from planned features.
+7. Preserve each third-party emulator's license and required notices when packaging.
 
 ## Roadmap
 
@@ -108,4 +133,4 @@ See docs/ROADMAP.md for planned milestones.
 
 ## License
 
-No license has been selected yet. Until one is added, all rights are reserved by the author. Please do not assume the code is available for reuse.
+No license has been selected for RetroDeck's own code yet. Until one is added, all rights are reserved by the author. Third-party emulator projects retain their own licenses.
