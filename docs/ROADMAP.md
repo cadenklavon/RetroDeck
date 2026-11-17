@@ -28,7 +28,7 @@ Items are marked complete only when implemented. Raspberry Pi hardware validatio
 ## Stage 3: Emulator integration and packaging
 - [x] Create a central catalog of standalone emulator candidates
 - [x] Define default emulator mappings for detected systems
-- [x] Search configured paths, RetroDeck's bundled-emulator folder, and system PATH
+- [x] Search configured paths, architecture-specific and legacy bundle folders, Debian game directories, and system PATH
 - [x] Add a modular process launcher with configurable argument templates
 - [x] Add unit tests for executable discovery and launch command construction
 - [x] Document the platform-specific packaging and first-run installation design
@@ -36,11 +36,14 @@ Items are marked complete only when implemented. Raspberry Pi hardware validatio
 - [ ] Select exact standalone emulator releases for each supported system
 - [ ] Verify licenses, bundled dependencies, notices, and source obligations for every selected build
 - [ ] Build and test Mupen64Plus for Raspberry Pi OS ARM64
-- [ ] Build and test Dolphin for Raspberry Pi OS ARM64
-- [ ] Select and validate standalone NES, SNES, Game Boy, GBA, DS, and PSP emulators
+- [ ] Test Dolphin installed from the Debian ARM64 package on Raspberry Pi 5
+- [ ] Test mGBA and Nestopia installed from Debian ARM64 packages
+- [ ] Select and validate standalone SNES, DS, and PSP emulators
 - [ ] Create reproducible ARM64 build scripts and release assets
 - [ ] Add a signed/versioned package manifest and SHA-256 verification
-- [ ] Add first-run install, repair, and update flow
+- [x] Add a Raspberry Pi OS ARM64 emulator setup page
+- [x] Add explicit, confirmation-gated APT installation for supported Debian ARM64 emulator packages
+- [ ] Add first-run repair and update flow for RetroDeck-managed emulator bundles
 - [x] Connect selected games in the Library page to the emulator launcher
 - [ ] Test real games and report missing firmware or runtime dependencies
 
