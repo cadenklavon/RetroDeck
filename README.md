@@ -19,6 +19,7 @@ RetroDeck is an in-development desktop application designed to organize and laun
 - Emulator candidate catalog with upstream project references
 - Executable discovery for configured, RetroDeck-bundled, and system-installed emulators
 - Modular process launcher with configurable argument templates and readable errors
+- Launch selected games from the Library page when a compatible emulator is available
 
 ## Supported file extensions
 
