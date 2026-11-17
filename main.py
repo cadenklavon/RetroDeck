@@ -341,16 +341,49 @@ class RetroDeckWindow(QMainWindow):
             return
 
         self.emulator_install_process = QProcess(self)
+        self.emulator_install_process.readyReadStandardOutput.connect(
+            self.on_emulator_install_output
+        )
+        self.emulator_install_process.readyReadStandardError.connect(
+            self.on_emulator_install_output
+        )
         self.emulator_install_process.finished.connect(self.on_emulator_install_finished)
         self.emulator_install_process.errorOccurred.connect(self.on_emulator_install_error)
+        self.emulator_install_log = ""
         self.emulator_install_phase = "update"
-        self.emulator_setup_status.setText("Updating package information. Approve the operating-system prompt.")
+        self.emulator_setup_status.setText(
+            "Refreshing package lists… This can take a few minutes. "
+            "Keep RetroDeck open while it runs."
+        )
         self.emulator_install_process.start("pkexec", ["apt-get", "update"])
 
+    def on_emulator_install_output(self):
+        process = self.emulator_install_process
+        chunks = []
+        if process.bytesAvailable():
+            chunks.append(bytes(process.readAll()).decode("utf-8", errors="replace"))
+        if not chunks:
+            return
+        output = "".join(chunks)
+        self.emulator_install_log = (self.emulator_install_log + output)[-5000:]
+        lines = [line.strip() for line in self.emulator_install_log.splitlines() if line.strip()]
+        latest = lines[-1] if lines else "Working…"
+        phase = "Refreshing package lists" if self.emulator_install_phase == "update" else "Installing emulators"
+        self.emulator_setup_status.setText(f"{phase}: {latest[-180:]}")
+
     def on_emulator_install_finished(self, exit_code, exit_status):
+        self.on_emulator_install_output()
         if exit_code != 0:
+            details = self.emulator_install_log.strip().splitlines()
+            detail = details[-1][-240:] if details else "No output was returned."
             self.emulator_setup_status.setText(
-                "Package operation did not complete. Check the system prompt and try again."
+                f"Package operation failed (exit code {exit_code}). {detail}"
+            )
+            QMessageBox.warning(
+                self, "Emulator installation failed",
+                "The package manager returned an error. The last reported message was:\n\n"
+                f"{detail}\n\n"
+                "You can retry after resolving the package-manager issue."
             )
             return
 
@@ -358,19 +391,29 @@ class RetroDeckWindow(QMainWindow):
             plan = supported_package_plan()
             packages = sorted({package for group in plan.values() for package in group})
             self.emulator_install_phase = "install"
-            self.emulator_setup_status.setText("Installing emulators. Approve the operating-system prompt.")
+            self.emulator_install_log = ""
+            self.emulator_setup_status.setText(
+                "Package lists refreshed. Installing Dolphin, mGBA, and Nestopia…"
+            )
             self.emulator_install_process.start(
                 *package_install_command(packages)
             )
             return
 
-        self.emulator_setup_status.setText("Package installation finished. Checking emulator executables…")
+        self.emulator_setup_status.setText(
+            "Installation command completed. Checking which emulators are available…"
+        )
         self.refresh_emulator_status()
 
     def on_emulator_install_error(self, process_error):
-        self.emulator_setup_status.setText(
-            "Could not start the system package manager. Make sure pkexec is installed "
-            "and your desktop session supports authorization."
+        detail = self.emulator_install_process.errorString()
+        self.emulator_setup_status.setText(f"Could not run the package manager: {detail}")
+        QMessageBox.warning(
+            self, "Could not start installer",
+            "RetroDeck could not start the system package manager.\n\n"
+            f"{detail}\n\n"
+            "Check that pkexec is installed and that your desktop session supports "
+            "the system authorization prompt."
         )
 
     def show_page(self, name):
