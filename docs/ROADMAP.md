@@ -41,7 +41,7 @@ Items are marked complete only when implemented. Raspberry Pi hardware validatio
 - [ ] Create reproducible ARM64 build scripts and release assets
 - [ ] Add a signed/versioned package manifest and SHA-256 verification
 - [ ] Add first-run install, repair, and update flow
-- [ ] Connect selected games in the UI to the emulator launcher
+- [x] Connect selected games in the Library page to the emulator launcher
 - [ ] Test real games and report missing firmware or runtime dependencies
 
 ## Stage 4: Controller support
