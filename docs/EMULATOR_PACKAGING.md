@@ -33,7 +33,8 @@ emulators/bin/<platform>/<architecture>/<executable>
 ```
 
 The resolver also checks the older `emulators/bin/<platform>/` location for
-backwards compatibility, then checks the system PATH. This permits distro
+backwards compatibility, Debian's `/usr/games`, `/usr/bin`, and
+`/usr/local/bin`, then checks the system PATH. This permits distro
 packages to work without copying their files into the RetroDeck repository.
 
 ## Important limitations
