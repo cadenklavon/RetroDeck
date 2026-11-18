@@ -344,7 +344,7 @@ class RetroDeckWindow(QMainWindow):
             else:
                 detail = "Not installed yet"
             self.emulator_status_list.addItem(
-                f"{profile['name']}  |  {', '.join(profile['systems'])}\\n{detail}"
+                f"{profile['name']}  |  {', '.join(profile['systems'])}\n{detail}"
             )
         try:
             manifest = load_manifest()
