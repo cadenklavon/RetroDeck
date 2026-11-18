@@ -179,6 +179,8 @@ def install_package(package, destination_root=None, allowed_hosts=None, opener=N
             try:
                 total_size = int(response.headers.get("Content-Length", 0))
             except (AttributeError, TypeError, ValueError):
+                total_size = 0
+            if total_size <= 0:
                 total_size = int(package.get("size", 0) or 0)
             while True:
                 chunk = response.read(1024 * 1024)
