@@ -47,7 +47,15 @@ def validate_package(package, allowed_hosts):
     required = ("id", "version", "platform", "architecture", "url", "sha256", "archive", "executable")
     if not isinstance(package, dict) or any(not package.get(key) for key in required):
         raise ValueError("Emulator package entry is missing required fields.")
-    if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", package["id"]):\n        raise ValueError("Package ID contains unsafe characters.")\n    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]*", package["version"]):\n        raise ValueError("Package version contains unsafe characters.")\n    executable_path = PurePosixPath(package["executable"].replace("\\\\", "/"))\n    if executable_path.is_absolute() or any(part in ("", ".", "..") for part in executable_path.parts):\n        raise ValueError("Package executable path is unsafe.")\n    parsed = urllib.parse.urlparse(package["url"])
+    if not all(isinstance(package[key], str) for key in required):
+        raise ValueError("Package metadata fields must be strings.")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", package["id"]):
+        raise ValueError("Package ID contains unsafe characters.")
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]*", package["version"]):
+        raise ValueError("Package version contains unsafe characters.")
+    executable_path = PurePosixPath(package["executable"].replace("\\", "/"))
+    if executable_path.is_absolute() or any(part in ("", ".", "..") for part in executable_path.parts):
+        raise ValueError("Package executable path is unsafe.")\n    parsed = urllib.parse.urlparse(package["url"])
     if parsed.scheme != "https" or not parsed.hostname or parsed.hostname.lower() not in allowed_hosts:
         raise ValueError("Emulator downloads must use an approved HTTPS host.")
     digest = package["sha256"].lower()
