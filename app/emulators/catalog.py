@@ -57,7 +57,7 @@ EMULATOR_CATALOG = {
         "project_url": "https://github.com/melonDS-emu/melonDS",
         "license": "GPL-3.0-or-later",
         "license_status": "review-required",
-        "executables": {"linux": ["melonDS"], "windows": ["melonDS.exe"]},
+        "executables": {"linux": ["melonDS.AppImage", "melonDS"], "windows": ["melonDS.exe"]},
         "arguments": ["{rom}"],
     },
     "ppsspp": {
