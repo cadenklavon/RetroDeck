@@ -145,7 +145,7 @@ def _extract_archive(archive_path, destination, archive_type):
                     raise ValueError("Archive contains a link or special file.")
 
 
-def install_package(package, destination_root=None, allowed_hosts=None, opener=None):
+def install_package(package, destination_root=None, allowed_hosts=None, opener=None, progress_callback=None):
     """Download, verify, and atomically install one manifest package."""
     allowed_hosts = {host.lower() for host in (allowed_hosts or set())}
     validate_package(package, allowed_hosts)
@@ -176,6 +176,10 @@ def install_package(package, destination_root=None, allowed_hosts=None, opener=N
             ):
                 raise ValueError("Emulator download redirected to an unapproved host.")
             downloaded = 0
+            try:
+                total_size = int(response.headers.get("Content-Length", 0))
+            except (AttributeError, TypeError, ValueError):
+                total_size = int(package.get("size", 0) or 0)
             while True:
                 chunk = response.read(1024 * 1024)
                 if not chunk:
@@ -184,6 +188,10 @@ def install_package(package, destination_root=None, allowed_hosts=None, opener=N
                 if downloaded > MAX_DOWNLOAD_BYTES:
                     raise ValueError("Emulator package exceeds the download size limit.")
                 output.write(chunk)
+                if progress_callback:
+                    progress_callback(downloaded, total_size)
+            if progress_callback:
+                progress_callback(downloaded, total_size or downloaded)
 
         if sha256_file(download_path) != package["sha256"].lower():
             raise ValueError("Emulator download failed SHA-256 verification.")
