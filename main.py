@@ -23,50 +23,61 @@ from app.emulators.manager import emulator_status
 
 DARK_THEME = """
 * { font-family: "Inter", "DejaVu Sans", sans-serif; }
-QMainWindow, QWidget#Root, QWidget#Page { background: #0b1020; color: #eef2ff; }
-QWidget#Sidebar { background: #10182b; border: 1px solid #202c46; border-radius: 16px; }
-QLabel#Brand { color: #f5f7ff; font-size: 20px; font-weight: 900; letter-spacing: 2px; }
-QLabel#Eyebrow { color: #72d9ff; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
-QLabel#PageTitle { color: #f4f6ff; font-size: 27px; font-weight: 800; }
-QLabel#Muted { color: #9aa8c2; font-size: 12px; }
-QLabel#SectionTitle { color: #f0f3ff; font-size: 18px; font-weight: 750; }
-QPushButton#NavButton { color: #9eabc6; background: transparent; border: 1px solid transparent; border-radius: 9px; padding: 11px; text-align: left; }
-QPushButton#NavButton:hover { background: #1b2943; color: white; }
-QPushButton#NavButton:checked { color: white; background: #203754; border: 1px solid #31577b; }
-QPushButton#PrimaryButton { color: #071321; background: #72d9ff; border: 0; border-radius: 9px; padding: 11px 15px; font-weight: 800; }
-QPushButton#PrimaryButton:hover { background: #a0e7ff; }
-QPushButton#SecondaryButton { color: #eaf2ff; background: #1b2943; border: 1px solid #344664; border-radius: 9px; padding: 10px 14px; }
-QPushButton#SecondaryButton:hover { background: #293b5b; }
-QLineEdit { color: #f5f7ff; background: #121c31; border: 1px solid #2b3b59; border-radius: 9px; padding: 11px; }
-QListWidget { color: #eef2ff; background: #121c31; border: 1px solid #263653; border-radius: 12px; padding: 7px; }
-QListWidget::item { padding: 12px 10px; border-bottom: 1px solid #263653; }
-QListWidget::item:selected { background: #203754; border-radius: 6px; }
-QFrame#Panel { background: #121c31; border: 1px solid #263653; border-radius: 14px; }
-QPushButton:focus, QLineEdit:focus, QListWidget:focus { border: 2px solid #72d9ff; }
+QMainWindow, QWidget#Root, QWidget#Page { background: #11151d; color: #f5f6f8; }
+QWidget#TopBar { background: #1b222d; border: 1px solid #303a49; border-radius: 18px; }
+QFrame#NavDivider { background: #3b4656; }
+QLabel#Brand { color: #f8f9fb; font-size: 19px; font-weight: 900; letter-spacing: 1px; }
+QLabel#Eyebrow { color: #8bc9e8; font-size: 11px; font-weight: 800; letter-spacing: 1.4px; }
+QLabel#PageTitle { color: #f8f9fb; font-size: 28px; font-weight: 800; }
+QLabel#FeatureTitle { color: #ffffff; font-size: 25px; font-weight: 850; }
+QLabel#Muted { color: #aab5c4; font-size: 12px; }
+QLabel#SectionTitle { color: #f4f6fa; font-size: 18px; font-weight: 750; }
+QPushButton#NavButton { color: #c0c9d5; background: transparent; border: 1px solid transparent; border-radius: 12px; padding: 10px 13px; font-weight: 650; }
+QPushButton#NavButton:hover { background: #2a3544; color: white; }
+QPushButton#NavButton:checked { color: white; background: #35475c; border: 1px solid #536d89; }
+QPushButton#PrimaryButton { color: #101820; background: #a7d9ee; border: 0; border-radius: 13px; padding: 12px 18px; font-weight: 800; }
+QPushButton#PrimaryButton:hover { background: #c3e8f6; }
+QPushButton#SecondaryButton, QPushButton#ActionTile { color: #f0f3f7; background: #252f3d; border: 1px solid #3c4a5d; border-radius: 14px; padding: 12px 16px; font-weight: 700; }
+QPushButton#SecondaryButton:hover, QPushButton#ActionTile:hover { background: #344256; }
+QLineEdit { color: #f5f7fa; background: #202a37; border: 1px solid #3b485a; border-radius: 12px; padding: 12px; }
+QListWidget { color: #f2f4f7; background: #1a222d; border: 1px solid #303c4d; border-radius: 16px; padding: 8px; }
+QListWidget::item { padding: 12px 10px; border-bottom: 1px solid #303c4d; }
+QListWidget::item:selected { background: #35475c; border-radius: 8px; }
+QListWidget#GameTiles { background: transparent; border: 0; padding: 2px; }
+QListWidget#GameTiles::item { background: #273342; border: 1px solid #3a4a5d; border-radius: 14px; padding: 8px; margin: 4px; text-align: center; }
+QListWidget#GameTiles::item:hover { background: #35475c; border: 2px solid #a7d9ee; }
+QFrame#Panel, QFrame#FeaturePanel { background: #202a37; border: 1px solid #344255; border-radius: 18px; }
+QFrame#FeaturePanel { background: #26394c; }
+QPushButton:focus, QLineEdit:focus, QListWidget:focus { border: 2px solid #a7d9ee; }
 """
 
 LIGHT_THEME = """
 * { font-family: "Inter", "DejaVu Sans", sans-serif; }
-QMainWindow, QWidget#Root, QWidget#Page { background: #edf2f9; color: #18243a; }
-QWidget#Sidebar { background: white; border: 1px solid #d8e0ec; border-radius: 16px; }
-QLabel#Brand { color: #17243a; font-size: 20px; font-weight: 900; letter-spacing: 2px; }
-QLabel#Eyebrow { color: #087da9; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
-QLabel#PageTitle { color: #17243a; font-size: 27px; font-weight: 800; }
-QLabel#Muted { color: #687791; font-size: 12px; }
-QLabel#SectionTitle { color: #17243a; font-size: 18px; font-weight: 750; }
-QPushButton#NavButton { color: #64728a; background: transparent; border: 1px solid transparent; border-radius: 9px; padding: 11px; text-align: left; }
-QPushButton#NavButton:hover { background: #edf3fb; color: #17243a; }
-QPushButton#NavButton:checked { color: #075d7e; background: #e1f3fb; border: 1px solid #b9e2f1; }
-QPushButton#PrimaryButton { color: white; background: #087da9; border: 0; border-radius: 9px; padding: 11px 15px; font-weight: 800; }
-QPushButton#SecondaryButton { color: #1a2a42; background: white; border: 1px solid #cbd6e5; border-radius: 9px; padding: 10px 14px; }
-QLineEdit { color: #18243a; background: white; border: 1px solid #cbd6e5; border-radius: 9px; padding: 11px; }
-QListWidget { color: #18243a; background: white; border: 1px solid #d8e0ec; border-radius: 12px; padding: 7px; }
-QListWidget::item { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
-QListWidget::item:selected { background: #e1f3fb; border-radius: 6px; }
-QFrame#Panel { background: white; border: 1px solid #d8e0ec; border-radius: 14px; }
-QPushButton:focus, QLineEdit:focus, QListWidget:focus { border: 2px solid #087da9; }
+QMainWindow, QWidget#Root, QWidget#Page { background: #edf1f5; color: #17212d; }
+QWidget#TopBar { background: #ffffff; border: 1px solid #d6dee8; border-radius: 18px; }
+QFrame#NavDivider { background: #d5dde7; }
+QLabel#Brand { color: #17212d; font-size: 19px; font-weight: 900; letter-spacing: 1px; }
+QLabel#Eyebrow { color: #287c9e; font-size: 11px; font-weight: 800; letter-spacing: 1.4px; }
+QLabel#PageTitle { color: #17212d; font-size: 28px; font-weight: 800; }
+QLabel#FeatureTitle { color: #ffffff; font-size: 25px; font-weight: 850; }
+QLabel#Muted { color: #637286; font-size: 12px; }
+QLabel#SectionTitle { color: #17212d; font-size: 18px; font-weight: 750; }
+QPushButton#NavButton { color: #526174; background: transparent; border: 1px solid transparent; border-radius: 12px; padding: 10px 13px; font-weight: 650; }
+QPushButton#NavButton:hover { background: #edf2f7; color: #17212d; }
+QPushButton#NavButton:checked { color: #155c78; background: #e0f0f6; border: 1px solid #b8dce9; }
+QPushButton#PrimaryButton { color: white; background: #287c9e; border: 0; border-radius: 13px; padding: 12px 18px; font-weight: 800; }
+QPushButton#SecondaryButton, QPushButton#ActionTile { color: #233247; background: white; border: 1px solid #ccd6e2; border-radius: 14px; padding: 12px 16px; font-weight: 700; }
+QLineEdit { color: #17212d; background: white; border: 1px solid #ccd6e2; border-radius: 12px; padding: 12px; }
+QListWidget { color: #17212d; background: white; border: 1px solid #d6dee8; border-radius: 16px; padding: 8px; }
+QListWidget::item { padding: 12px 10px; border-bottom: 1px solid #e1e7ee; }
+QListWidget::item:selected { background: #e0f0f6; border-radius: 8px; }
+QListWidget#GameTiles { background: transparent; border: 0; padding: 2px; }
+QListWidget#GameTiles::item { background: white; border: 1px solid #d2dce7; border-radius: 14px; padding: 8px; margin: 4px; }
+QListWidget#GameTiles::item:hover { background: #e8f4f8; border: 2px solid #287c9e; }
+QFrame#Panel, QFrame#FeaturePanel { background: #ffffff; border: 1px solid #d6dee8; border-radius: 18px; }
+QFrame#FeaturePanel { background: #31556b; }
+QPushButton:focus, QLineEdit:focus, QListWidget:focus { border: 2px solid #287c9e; }
 """
-
 
 class RetroDeckWindow(QMainWindow):
     PAGES = ["Home", "Library", "Systems", "Search", "Emulators", "Settings"]
@@ -82,13 +93,15 @@ class RetroDeckWindow(QMainWindow):
 
         root = QWidget()
         root.setObjectName("Root")
-        shell = QHBoxLayout(root)
-        shell.setContentsMargins(14, 14, 14, 14)
+        shell = QVBoxLayout(root)
+        shell.setContentsMargins(18, 14, 18, 14)
         shell.setSpacing(14)
         shell.addWidget(self.build_sidebar())
 
         content = QVBoxLayout()
-        self.breadcrumb = QLabel("HOME")
+        content.setContentsMargins(4, 0, 4, 0)
+        content.setSpacing(10)
+        self.breadcrumb = QLabel("HOME  /  YOUR COLLECTION")
         self.breadcrumb.setObjectName("Eyebrow")
         content.addWidget(self.breadcrumb)
 
@@ -109,34 +122,36 @@ class RetroDeckWindow(QMainWindow):
         self.refresh_library(show_status=False)
 
     def build_sidebar(self):
-        sidebar = QWidget()
-        sidebar.setObjectName("Sidebar")
-        sidebar.setFixedWidth(190)
-        layout = QVBoxLayout(sidebar)
-        layout.setContentsMargins(13, 18, 13, 14)
+        """Console-inspired horizontal navigation."""
+        bar = QWidget()
+        bar.setObjectName("TopBar")
+        layout = QHBoxLayout(bar)
+        layout.setContentsMargins(18, 10, 18, 10)
         layout.setSpacing(8)
         brand = QLabel("◈  RETRODECK")
         brand.setObjectName("Brand")
         layout.addWidget(brand)
-        caption = QLabel("YOUR GAME SPACE")
-        caption.setObjectName("Eyebrow")
-        caption.setContentsMargins(5, 18, 0, 8)
-        layout.addWidget(caption)
+        divider = QFrame()
+        divider.setObjectName("NavDivider")
+        divider.setFixedSize(1, 30)
+        layout.addWidget(divider)
         for icon, name in [("⌂", "Home"), ("▦", "Library"), ("◈", "Systems"), ("⌕", "Search"), ("⬇", "Emulators")]:
-            button = QPushButton(f"{icon}    {name}")
+            button = QPushButton(f"{icon}  {name}")
             button.setObjectName("NavButton")
             button.setCheckable(True)
+            button.setMinimumHeight(42)
             button.clicked.connect(lambda checked=False, page=name: self.show_page(page))
             self.nav_buttons[name] = button
             layout.addWidget(button)
-        layout.addStretch()
-        settings_button = QPushButton("⚙    Settings")
+        layout.addStretch(1)
+        settings_button = QPushButton("⚙  Settings")
         settings_button.setObjectName("NavButton")
         settings_button.setCheckable(True)
+        settings_button.setMinimumHeight(42)
         settings_button.clicked.connect(lambda: self.show_page("Settings"))
         self.nav_buttons["Settings"] = settings_button
         layout.addWidget(settings_button)
-        return sidebar
+        return bar
 
     def make_page(self):
         page = QWidget()
@@ -157,28 +172,67 @@ class RetroDeckWindow(QMainWindow):
 
     def build_home_page(self):
         page, layout = self.make_page()
-        self.page_heading(layout, "Welcome to RetroDeck", "Your games, from every system, in one place.")
-        panel = QFrame()
-        panel.setObjectName("Panel")
-        panel_layout = QVBoxLayout(panel)
-        panel_layout.setContentsMargins(20, 18, 20, 18)
-        title = QLabel("Your collection")
-        title.setObjectName("SectionTitle")
+        self.page_heading(layout, "Good to see you", "Pick up where you left off, or explore your collection.")
+        featured = QFrame()
+        featured.setObjectName("FeaturePanel")
+        featured_layout = QVBoxLayout(featured)
+        featured_layout.setContentsMargins(24, 20, 24, 20)
+        eyebrow = QLabel("YOUR GAME SPACE")
+        eyebrow.setObjectName("Eyebrow")
+        title = QLabel("All your games. One place.")
+        title.setObjectName("FeatureTitle")
+        subtitle = QLabel("Your library is ready whenever you are.")
+        subtitle.setObjectName("Muted")
+        featured_layout.addWidget(eyebrow)
+        featured_layout.addWidget(title)
+        featured_layout.addWidget(subtitle)
+        layout.addWidget(featured)
+        section_row = QHBoxLayout()
+        section = QLabel("Recently added")
+        section.setObjectName("SectionTitle")
         self.home_count = QLabel("Scanning your folders…")
         self.home_count.setObjectName("Muted")
-        scan = QPushButton("Scan game folders")
+        section_row.addWidget(section)
+        section_row.addStretch()
+        section_row.addWidget(self.home_count)
+        layout.addLayout(section_row)
+        self.home_games = QListWidget()
+        self.home_games.setObjectName("GameTiles")
+        self.home_games.setViewMode(QListWidget.ViewMode.IconMode)
+        self.home_games.setFlow(QListWidget.Flow.LeftToRight)
+        self.home_games.setWrapping(False)
+        self.home_games.setResizeMode(QListWidget.ResizeMode.Adjust)
+        self.home_games.setMovement(QListWidget.Movement.Static)
+        self.home_games.setIconSize(__import__("PySide6.QtCore", fromlist=["QSize"]).QSize(112, 112))
+        self.home_games.setGridSize(__import__("PySide6.QtCore", fromlist=["QSize"]).QSize(150, 170))
+        self.home_games.setFixedHeight(205)
+        self.home_games.itemDoubleClicked.connect(self.open_game_from_home)
+        layout.addWidget(self.home_games)
+        actions = QHBoxLayout()
+        for label, page_name in [("Open game library", "Library"), ("Browse systems", "Systems"), ("Manage emulators", "Emulators")]:
+            button = QPushButton(label)
+            button.setObjectName("ActionTile")
+            button.setMinimumHeight(66)
+            button.clicked.connect(lambda checked=False, target=page_name: self.show_page(target))
+            actions.addWidget(button)
+        layout.addLayout(actions)
+        scan = QPushButton("↻  Scan game folders")
         scan.setObjectName("PrimaryButton")
         scan.clicked.connect(self.refresh_library)
-        panel_layout.addWidget(title)
-        panel_layout.addWidget(self.home_count)
-        panel_layout.addWidget(scan, 0, Qt.AlignmentFlag.AlignLeft)
-        layout.addWidget(panel)
-        info = QLabel("Start by adding the folders that contain your legally obtained game files in Settings. RetroDeck scans filenames and organizes matches by system. It does not move or change your files.")
-        info.setObjectName("Muted")
-        info.setWordWrap(True)
-        layout.addWidget(info)
+        layout.addWidget(scan, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addStretch()
         return page
+
+    def open_game_from_home(self, item):
+        game_path = item.data(Qt.ItemDataRole.UserRole)
+        for index in range(self.library_list.count()):
+            candidate = self.library_list.item(index)
+            if candidate.data(Qt.ItemDataRole.UserRole) == game_path:
+                self.library_list.setCurrentItem(candidate)
+                self.show_page("Library")
+                self.launch_selected_game()
+                return
+        self.show_page("Library")
 
     def build_library_page(self):
         page, layout = self.make_page()
@@ -470,6 +524,7 @@ class RetroDeckWindow(QMainWindow):
         self.populate_library()
         self.populate_search()
         self.populate_systems()
+        self.populate_home_games()
         if hasattr(self, "home_count"):
             self.home_count.setText(f"{len(self.games)} games detected across {len(self.settings['rom_directories'])} configured folders.")
         if hasattr(self, "library_status"):
@@ -482,6 +537,17 @@ class RetroDeckWindow(QMainWindow):
 
     def game_display_text(self, game):
         return f"{game.title}\n{game.system}  •  {game.path}"
+
+    def populate_home_games(self):
+        if not hasattr(self, "home_games"):
+            return
+        self.home_games.clear()
+        for game in self.games[:30]:
+            item = QListWidgetItem(f"{game.title}\n{game.system}")
+            item.setData(Qt.ItemDataRole.UserRole, str(game.path))
+            self.home_games.addItem(item)
+        if not self.games:
+            self.home_games.addItem("Your library is empty\nAdd ROM folders in Settings")
 
     def populate_library(self):
         if not hasattr(self, "library_list"):
