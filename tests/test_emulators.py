@@ -4,7 +4,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.emulators.catalog import SYSTEM_DEFAULTS
-from app.emulators.installer import package_install_command, supported_package_plan
 from app.emulators.launcher import EmulatorLaunchError, launch_game
 from app.emulators.manager import (
     current_architecture, emulator_candidates, emulator_status, resolve_emulator,
