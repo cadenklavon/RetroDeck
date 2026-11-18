@@ -12,6 +12,7 @@ def load_settings():
         "rom_directories": [],
         "theme": "dark",
         "rom_directories_configured": False,
+        "emulator_setup_completed": False,
     }
     try:
         data = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
@@ -26,6 +27,9 @@ def load_settings():
         defaults["theme"] = "light" if data.get("theme") == "light" else "dark"
         defaults["rom_directories_configured"] = bool(
             data.get("rom_directories_configured", False)
+        )
+        defaults["emulator_setup_completed"] = bool(
+            data.get("emulator_setup_completed", False)
         )
     except (OSError, json.JSONDecodeError):
         # A first run has no settings file. The bundled project ROMs folder
