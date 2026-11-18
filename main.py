@@ -399,8 +399,6 @@ class RetroDeckWindow(QMainWindow):
     def start_emulator_setup(self, auto=False):
         if self.emulator_worker is not None and self.emulator_worker.isRunning():
             return
-        if auto and self.settings.get("emulator_setup_completed", False):
-            return
         try:
             packages = self.compatible_emulator_packages()
         except ValueError as exc:
@@ -412,9 +410,6 @@ class RetroDeckWindow(QMainWindow):
             if not emulator_status(package["id"])["available"]
         ]
         if not packages:
-            if auto:
-                self.settings["emulator_setup_completed"] = True
-                self.persist_settings()
             self.emulator_setup_status.setText(
                 "No missing compatible emulators were found for this device."
             )
@@ -459,9 +454,6 @@ class RetroDeckWindow(QMainWindow):
         self.emulator_progress.setValue(100 if success else self.emulator_progress.value())
         self.emulator_progress.setFormat("Setup complete" if success else "Setup finished with issues")
         self.emulator_setup_status.setText(message)
-        if success:
-            self.settings["emulator_setup_completed"] = True
-            self.persist_settings()
         self.refresh_emulator_status()
         if not success:
             QMessageBox.warning(self, "Emulator setup", message)
