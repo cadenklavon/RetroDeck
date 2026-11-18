@@ -74,5 +74,48 @@ class ManagedInstallerTests(unittest.TestCase):
             self.assertFalse((Path(temp) / "testemu").exists())
 
 
+
+    def test_installs_official_appimage_zip_and_reports_progress(self):
+        archive_buffer = io.BytesIO()
+        with zipfile.ZipFile(archive_buffer, "w") as archive:
+            archive.writestr("package/melonDS-aarch64.AppImage", b"fake appimage")
+        payload = archive_buffer.getvalue()
+        digest = hashlib.sha256(payload).hexdigest()
+        package = {
+            "id": "melonds", "version": "1.1", "platform": "linux",
+            "architecture": "arm64",
+            "url": "https://github.com.example.test/melonds.zip",
+            "sha256": digest, "size": len(payload),
+            "archive": "appimage_zip", "executable": "melonDS.AppImage",
+        }
+
+        class Response(io.BytesIO):
+            def __enter__(self): return self
+            def __exit__(self, *args): self.close()
+
+        progress = []
+        with tempfile.TemporaryDirectory() as temp:
+            result = install_package(
+                package, Path(temp), {"github.com.example.test"},
+                opener=lambda *args, **kwargs: Response(payload),
+                progress_callback=lambda downloaded, total: progress.append((downloaded, total)),
+            )
+            self.assertEqual(result.read_bytes(), b"fake appimage")
+            self.assertTrue(result.stat().st_mode & 0o111)
+            self.assertTrue(progress)
+            self.assertEqual(progress[-1], (len(payload), len(payload)))
+
+    def test_manifest_contains_checksum_pinned_pi_arm64_package(self):
+        manifest = load_manifest()
+        packages = [
+            package for package in manifest["packages"]
+            if package.get("id") == "melonds"
+            and package.get("platform") == "linux"
+            and package.get("architecture") == "arm64"
+        ]
+        self.assertTrue(packages)
+        self.assertEqual(len(packages[0]["sha256"]), 64)
+        self.assertEqual(packages[0]["archive"], "appimage_zip")
+
 if __name__ == "__main__":
     unittest.main()
