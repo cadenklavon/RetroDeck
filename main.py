@@ -374,7 +374,7 @@ class RetroDeckWindow(QMainWindow):
             else:
                 detail = "Not installed"
             self.emulator_status_list.addItem(
-                f"{profile['name']}  |  {', '.join(profile['systems'])}\\n{detail}"
+                f"{profile['name']}  |  {', '.join(profile['systems'])}\n{detail}"
             )
         try:
             packages = self.compatible_emulator_packages()
