@@ -5,20 +5,21 @@ The ROM scanner only reads filenames and paths. It never modifies game files.
 """
 import sys
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication, QFileDialog, QFrame, QHBoxLayout, QLabel, QListWidget,
     QListWidgetItem, QMainWindow, QMessageBox, QPushButton, QLineEdit,
-    QStackedWidget, QVBoxLayout, QWidget,
+    QProgressBar, QStackedWidget, QVBoxLayout, QWidget,
 )
 
 from app.config.settings import load_settings, save_settings
 from app.library.scanner import scan_rom_directories
 from app.emulators.catalog import EMULATOR_CATALOG
 from app.emulators.managed_installer import load_manifest
+from app.emulators.install_worker import EmulatorInstallWorker
 from app.emulators.launcher import EmulatorLaunchError, launch_game
-from app.emulators.manager import emulator_status
+from app.emulators.manager import current_architecture, current_platform, emulator_status
 
 
 DARK_THEME = """
@@ -120,6 +121,8 @@ class RetroDeckWindow(QMainWindow):
         self.show_page("Home")
         self.install_shortcuts()
         self.refresh_library(show_status=False)
+        self.emulator_worker = None
+        QTimer.singleShot(1400, lambda: self.start_emulator_setup(auto=True))
 
     def build_sidebar(self):
         """Console-inspired horizontal navigation."""
@@ -315,21 +318,48 @@ class RetroDeckWindow(QMainWindow):
         page, layout = self.make_page()
         self.page_heading(
             layout, "Emulator Setup",
-            "RetroDeck manages compatible standalone emulators inside your user account. "
-            "No terminal, system package manager, or administrator password should be needed.",
+            "RetroDeck downloads and manages compatible standalone emulators for this device. "
+            "Setup runs in the background and does not need administrator access.",
         )
         self.emulator_status_list = QListWidget()
         layout.addWidget(self.emulator_status_list, 1)
-        self.emulator_setup_status = QLabel("")
+
+        self.emulator_setup_status = QLabel("Checking compatible emulator packages…")
         self.emulator_setup_status.setObjectName("Muted")
         self.emulator_setup_status.setWordWrap(True)
         layout.addWidget(self.emulator_setup_status)
-        refresh = QPushButton("Refresh emulator status")
-        refresh.setObjectName("PrimaryButton")
+
+        self.emulator_progress = QProgressBar()
+        self.emulator_progress.setRange(0, 100)
+        self.emulator_progress.setValue(0)
+        self.emulator_progress.setFormat("Ready")
+        self.emulator_progress.setVisible(False)
+        layout.addWidget(self.emulator_progress)
+
+        actions = QHBoxLayout()
+        self.install_emulators_button = QPushButton("Install available emulators")
+        self.install_emulators_button.setObjectName("PrimaryButton")
+        self.install_emulators_button.clicked.connect(self.start_emulator_setup)
+        refresh = QPushButton("Refresh status")
+        refresh.setObjectName("SecondaryButton")
         refresh.clicked.connect(self.refresh_emulator_status)
-        layout.addWidget(refresh, 0, Qt.AlignmentFlag.AlignLeft)
+        actions.addWidget(self.install_emulators_button)
+        actions.addWidget(refresh)
+        actions.addStretch()
+        layout.addLayout(actions)
         self.refresh_emulator_status()
         return page
+
+    def compatible_emulator_packages(self):
+        manifest = load_manifest()
+        platform_name = current_platform()
+        architecture = current_architecture()
+        return [
+            package for package in manifest["packages"]
+            if package.get("platform") == platform_name
+            and package.get("architecture") == architecture
+            and package.get("id") in EMULATOR_CATALOG
+        ]
 
     def refresh_emulator_status(self):
         if not hasattr(self, "emulator_status_list"):
@@ -342,21 +372,99 @@ class RetroDeckWindow(QMainWindow):
                 installed_count += 1
                 detail = f"Installed: {status['path']}"
             else:
-                detail = "Not installed yet"
+                detail = "Not installed"
             self.emulator_status_list.addItem(
-                f"{profile['name']}  |  {', '.join(profile['systems'])}\n{detail}"
+                f"{profile['name']}  |  {', '.join(profile['systems'])}\\n{detail}"
             )
         try:
-            manifest = load_manifest()
-            package_count = len(manifest["packages"])
+            packages = self.compatible_emulator_packages()
+            installed_ids = {
+                package["id"] for package in packages
+                if emulator_status(package["id"])["available"]
+            }
+            available_count = len(packages) - len(installed_ids)
             self.emulator_setup_status.setText(
                 f"{installed_count} emulator(s) detected. "
-                f"{package_count} verified package build(s) are currently published in RetroDeck's catalog. "
-                "The managed installer is ready, but no package is offered until its official build, "
-                "checksum, dependencies, and Raspberry Pi compatibility have been verified."
+                f"{available_count} compatible package(s) ready to install for "
+                f"{current_platform()} {current_architecture()}."
+            )
+            self.install_emulators_button.setEnabled(available_count > 0)
+            self.install_emulators_button.setText(
+                "Install available emulators" if available_count else "Emulators up to date"
             )
         except ValueError as exc:
             self.emulator_setup_status.setText(f"Emulator catalog could not be loaded: {exc}")
+            self.install_emulators_button.setEnabled(False)
+
+    def start_emulator_setup(self, auto=False):
+        if self.emulator_worker is not None and self.emulator_worker.isRunning():
+            return
+        if auto and self.settings.get("emulator_setup_completed", False):
+            return
+        try:
+            packages = self.compatible_emulator_packages()
+        except ValueError as exc:
+            self.emulator_setup_status.setText(f"Could not load emulator catalog: {exc}")
+            return
+
+        packages = [
+            package for package in packages
+            if not emulator_status(package["id"])["available"]
+        ]
+        if not packages:
+            if auto:
+                self.settings["emulator_setup_completed"] = True
+                self.persist_settings()
+            self.emulator_setup_status.setText(
+                "No missing compatible emulators were found for this device."
+            )
+            self.refresh_emulator_status()
+            return
+
+        allowed_hosts = {
+            host for package in packages for host in package.get("approved_hosts", [])
+        }
+        if not allowed_hosts:
+            self.emulator_setup_status.setText(
+                "The package catalog has no approved download hosts. Installation was stopped."
+            )
+            return
+
+        self.install_emulators_button.setEnabled(False)
+        self.emulator_progress.setVisible(True)
+        self.emulator_progress.setValue(0)
+        self.emulator_progress.setFormat("Preparing downloads…")
+        self.emulator_setup_status.setText(
+            f"Preparing {len(packages)} emulator package(s). You can keep using RetroDeck."
+        )
+
+        self.emulator_worker = EmulatorInstallWorker(packages, allowed_hosts, self)
+        self.emulator_worker.package_started.connect(
+            lambda emulator_id: self.emulator_progress.setFormat(
+                f"Downloading {EMULATOR_CATALOG[emulator_id]['name']}… %p%"
+            )
+        )
+        self.emulator_worker.progress_changed.connect(self.update_emulator_progress)
+        self.emulator_worker.setup_finished.connect(self.finish_emulator_setup)
+        self.emulator_worker.start()
+
+    def update_emulator_progress(self, emulator_id, overall_percent, package_percent):
+        self.emulator_progress.setValue(overall_percent)
+        name = EMULATOR_CATALOG.get(emulator_id, {}).get("name", emulator_id)
+        self.emulator_progress.setFormat(
+            f"{name}: {package_percent}%  |  Overall: {overall_percent}%"
+        )
+
+    def finish_emulator_setup(self, success, message):
+        self.emulator_progress.setValue(100 if success else self.emulator_progress.value())
+        self.emulator_progress.setFormat("Setup complete" if success else "Setup finished with issues")
+        self.emulator_setup_status.setText(message)
+        if success:
+            self.settings["emulator_setup_completed"] = True
+            self.persist_settings()
+        self.refresh_emulator_status()
+        if not success:
+            QMessageBox.warning(self, "Emulator setup", message)
 
     def show_page(self, name):
         self.pages.setCurrentIndex(self.PAGES.index(name))
