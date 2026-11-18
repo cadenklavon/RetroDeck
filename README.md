@@ -4,7 +4,7 @@
 
 RetroDeck is an in-development desktop application designed to organize and launch a personal retro-game library from one controller-friendly interface. The first deployment target is 64-bit Raspberry Pi OS on Raspberry Pi 5.
 
-> **Current status: Stage 3 foundation.** RetroDeck has a working PySide6 interface, configurable ROM folders, recursive game discovery, system grouping, search/filtering, local settings, an emulator candidate catalog, executable discovery, and a tested process-launching module. Real emulator packages, automatic installation, controller input, and end-to-end emulator testing are still outstanding.
+> **Current status: managed-installer foundation.** RetroDeck has a working PySide6 interface, configurable ROM folders, recursive game discovery, system grouping, search/filtering, local settings, an emulator candidate catalog, executable discovery, and a tested process-launching module. Real emulator packages, automatic installation, controller input, and end-to-end emulator testing are still outstanding.
 
 ## Current features
 
@@ -58,17 +58,16 @@ cd RetroDeck
 
 ## Emulator packaging direction
 
-RetroDeck is designed to launch standalone emulators directly. It will not require RetroArch as its central runtime.
+RetroDeck is designed to manage standalone emulators directly, without
+requiring RetroArch as its central runtime or asking users to install emulator
+packages manually. A verified, per-user installation engine is implemented.
+It stores emulator builds outside the Git source repository, verifies SHA-256
+before extraction, and avoids administrator privileges.
 
-The goal is for users to install RetroDeck and then install compatible emulator packages through a first-run setup screen, without manually finding each emulator. Compiled binaries will be delivered as platform-specific RetroDeck release assets or installed from a versioned, checksum-verified manifest. They will not be committed to the Git source history.
-
-The first packaging target is Raspberry Pi OS 64-bit / ARM64. Windows and other platforms need their own builds. No emulator binaries are bundled yet. Each emulator's license, dependencies, source-code obligations, and redistribution permissions must be checked before packaging.
-
-Candidate standalone emulators include Mupen64Plus (N64), Dolphin (GameCube/Wii), Nestopia (NES), bsnes (SNES), Gambatte (Game Boy/Color), mGBA (GBA), melonDS (DS), and PPSSPP (PSP). These are candidates, not a claim of completed support.
-
-See:
-- docs/EMULATOR_PACKAGING.md for the packaging and first-run installation plan.
-- docs/THIRD_PARTY_LICENSES.md for third-party license tracking.
+The package manifest is intentionally empty until exact official builds,
+checksums, dependencies, licenses, and Raspberry Pi 5 compatibility have been
+validated. This means automatic emulator downloads and first-run setup are
+not yet complete. See `docs/EMULATOR_PACKAGING.md` for implementation status.
 
 ## Planned experience
 
