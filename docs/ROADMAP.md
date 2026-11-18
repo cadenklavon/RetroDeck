@@ -40,10 +40,10 @@ Items are marked complete only when implemented. Raspberry Pi hardware validatio
 - [ ] Test mGBA and Nestopia installed from Debian ARM64 packages
 - [ ] Select and validate standalone SNES, DS, and PSP emulators
 - [ ] Create reproducible ARM64 build scripts and release assets
-- [ ] Add a signed/versioned package manifest and SHA-256 verification
-- [x] Add a Raspberry Pi OS ARM64 emulator setup page
-- [x] Add explicit, confirmation-gated APT installation for supported Debian ARM64 emulator packages
-- [ ] Add first-run repair and update flow for RetroDeck-managed emulator bundles
+- [x] Add a versioned package manifest structure and SHA-256 verification engine\n- [x] Add safe archive extraction and per-user versioned emulator storage
+- [x] Add an emulator setup/status page backed by the managed package catalog
+- [ ] Populate the manifest with verified official Raspberry Pi 5 ARM64 builds
+- [ ] Add background first-run installation, progress, update, repair, rollback, and removal
 - [x] Connect selected games in the Library page to the emulator launcher
 - [ ] Test real games and report missing firmware or runtime dependencies
 
