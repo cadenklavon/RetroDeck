@@ -4,7 +4,7 @@ import platform
 import shutil
 from pathlib import Path
 
-from app.emulators.catalog import EMULATOR_CATALOG, SYSTEM_DEFAULTS
+from app.emulators.catalog import EMULATOR_CATALOG, SYSTEM_DEFAULTS\nfrom app.emulators.managed_installer import application_data_dir
 
 
 def current_platform():
