@@ -77,7 +77,7 @@ def validate_package(package, allowed_hosts):
     digest = package["sha256"].lower()
     if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
         raise ValueError("Package SHA-256 must be 64 hexadecimal characters.")
-    if package["archive"] not in ("appimage", "zip", "tar.xz", "tar.gz"):
+    if package["archive"] not in ("appimage", "appimage_zip", "zip", "tar.xz", "tar.gz"):
         raise ValueError("Unsupported emulator archive format.")
     return package
 
@@ -203,7 +203,16 @@ def install_package(package, destination_root=None, allowed_hosts=None, opener=N
             staged_executable.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(download_path, staged_executable)
         else:
-            _extract_archive(download_path, staging, package["archive"])
+            archive_type = "zip" if package["archive"] == "appimage_zip" else package["archive"]
+            _extract_archive(download_path, staging, archive_type)
+            if package["archive"] == "appimage_zip":
+                appimages = list(staging.rglob("*.AppImage")) + list(staging.rglob("*.appimage"))
+                if len(appimages) != 1:
+                    raise ValueError("Expected exactly one AppImage in the official archive.")
+                expected_appimage = staging / executable_relative
+                expected_appimage.parent.mkdir(parents=True, exist_ok=True)
+                if appimages[0].resolve() != expected_appimage.resolve():
+                    shutil.move(str(appimages[0]), str(expected_appimage))
 
         executable = (staging / executable_relative).resolve()
         if staging.resolve() not in executable.parents or not executable.is_file():
