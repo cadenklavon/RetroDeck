@@ -190,6 +190,18 @@ class RetroDeckWindow(QMainWindow):
         featured_layout.addWidget(title)
         featured_layout.addWidget(subtitle)
         layout.addWidget(featured)
+
+        self.home_setup_status = QLabel("Emulators are ready.")
+        self.home_setup_status.setObjectName("Muted")
+        self.home_setup_status.setVisible(False)
+        layout.addWidget(self.home_setup_status)
+        self.home_setup_progress = QProgressBar()
+        self.home_setup_progress.setRange(0, 100)
+        self.home_setup_progress.setValue(0)
+        self.home_setup_progress.setFormat("Setting up emulators…")
+        self.home_setup_progress.setVisible(False)
+        layout.addWidget(self.home_setup_progress)
+
         section_row = QHBoxLayout()
         section = QLabel("Recently added")
         section.setObjectName("SectionTitle")
@@ -428,6 +440,10 @@ class RetroDeckWindow(QMainWindow):
         self.install_emulators_button.setEnabled(False)
         self.emulator_progress.setVisible(True)
         self.emulator_progress.setValue(0)
+        self.home_setup_status.setText("RetroDeck is preparing your emulators in the background.")
+        self.home_setup_status.setVisible(True)
+        self.home_setup_progress.setValue(0)
+        self.home_setup_progress.setVisible(True)
         self.emulator_progress.setFormat("Preparing downloads…")
         self.emulator_setup_status.setText(
             f"Preparing {len(packages)} emulator package(s). You can keep using RetroDeck."
@@ -445,6 +461,8 @@ class RetroDeckWindow(QMainWindow):
 
     def update_emulator_progress(self, emulator_id, overall_percent, package_percent):
         self.emulator_progress.setValue(overall_percent)
+        if hasattr(self, "home_setup_progress"):
+            self.home_setup_progress.setValue(overall_percent)
         name = EMULATOR_CATALOG.get(emulator_id, {}).get("name", emulator_id)
         self.emulator_progress.setFormat(
             f"{name}: {package_percent}%  |  Overall: {overall_percent}%"
@@ -454,6 +472,8 @@ class RetroDeckWindow(QMainWindow):
         self.emulator_progress.setValue(100 if success else self.emulator_progress.value())
         self.emulator_progress.setFormat("Setup complete" if success else "Setup finished with issues")
         self.emulator_setup_status.setText(message)
+        if hasattr(self, "home_setup_status"):
+            self.home_setup_status.setText(message)
         self.refresh_emulator_status()
         if not success:
             QMessageBox.warning(self, "Emulator setup", message)
