@@ -1,10 +1,11 @@
-"""Find bundled or user-configured emulator executables."""
+"""Find RetroDeck-managed, bundled, or user-configured emulator executables."""
 import os
 import platform
 import shutil
 from pathlib import Path
 
-from app.emulators.catalog import EMULATOR_CATALOG, SYSTEM_DEFAULTS\nfrom app.emulators.managed_installer import application_data_dir
+from app.emulators.catalog import EMULATOR_CATALOG, SYSTEM_DEFAULTS
+from app.emulators.managed_installer import application_data_dir
 
 
 def current_platform():
@@ -42,18 +43,25 @@ def emulator_candidates(emulator_id, configured_path=None, root=None):
     names = profile["executables"].get(platform_name, [])
     if configured_path:
         yield Path(configured_path).expanduser()
-    base = Path(root) if root is not None else project_root()
 
-    # New releases use an architecture-specific folder. Keep the old
-    # platform-only location as a compatibility fallback for existing builds.
+    # RetroDeck-managed versions are installed outside the source checkout.
+    managed_root = application_data_dir() / "emulators" / emulator_id
+    if managed_root.is_dir():
+        for version_dir in sorted(
+            (entry for entry in managed_root.iterdir() if entry.is_dir()),
+            reverse=True,
+        ):
+            for name in names:
+                yield version_dir / name
+
+    base = Path(root) if root is not None else project_root()
     architecture = current_architecture()
     for name in names:
         yield base / "emulators" / "bin" / platform_name / architecture / name
     for name in names:
         yield base / "emulators" / "bin" / platform_name / name
+
     if platform_name == "linux":
-        # Debian and Raspberry Pi OS place game applications in /usr/games,
-        # which is not guaranteed to be included in a desktop PATH.
         for directory in ("/usr/games", "/usr/bin", "/usr/local/bin"):
             for name in names:
                 yield Path(directory) / name
@@ -84,7 +92,8 @@ def emulator_status(emulator_id, configured_path=None, root=None):
     executable = resolve_emulator(emulator_id, configured_path, root)
     if executable is None:
         return {
-            "available": False, "path": None,
+            "available": False,
+            "path": None,
             "reason": "Emulator is not installed or bundled for this platform.",
         }
     return {"available": True, "path": str(executable), "reason": ""}
