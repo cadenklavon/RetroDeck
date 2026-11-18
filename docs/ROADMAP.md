@@ -42,8 +42,11 @@ Items are marked complete only when implemented. Raspberry Pi hardware validatio
 - [ ] Create reproducible ARM64 build scripts and release assets
 - [x] Add a versioned package manifest structure and SHA-256 verification engine\n- [x] Add safe archive extraction and per-user versioned emulator storage
 - [x] Add an emulator setup/status page backed by the managed package catalog
-- [ ] Populate the manifest with verified official Raspberry Pi 5 ARM64 builds
-- [ ] Add background first-run installation, progress, update, repair, rollback, and removal
+- [x] Publish the first checksum-pinned official Raspberry Pi OS ARM64 package (melonDS 1.1)
+- [x] Add automatic missing-package checks during startup
+- [x] Add background package downloads and an installation progress indicator
+- [ ] Validate melonDS AppImage launch and runtime dependencies on Raspberry Pi 5
+- [ ] Add more verified ARM64 packages, then implement update, repair, rollback, and removal
 - [x] Connect selected games in the Library page to the emulator launcher
 - [ ] Test real games and report missing firmware or runtime dependencies
 
