@@ -40,6 +40,26 @@ class EmulatorManagerTests(unittest.TestCase):
                 candidates = list(emulator_candidates("mgba"))
         self.assertIn(Path("/usr/games/mgba-qt"), candidates)
 
+
+    def test_finds_retrodeck_managed_install(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "mgba" / "0.10.5"
+            root.mkdir(parents=True)
+            executable = root / "mgba"
+            executable.write_text("test", encoding="utf-8")
+            with patch("app.emulators.manager.application_data_dir", return_value=Path(temporary).parent):
+                # The managed root is application_data_dir()/emulators/<id>.
+                managed_root = Path(temporary).parent / "emulators"
+                (managed_root / "mgba").mkdir(parents=True)
+                version = managed_root / "mgba" / "0.10.5"
+                version.mkdir(parents=True, exist_ok=True)
+                managed_executable = version / "mgba"
+                managed_executable.write_text("test", encoding="utf-8")
+                with patch("app.emulators.manager.current_platform", return_value="linux"):
+                    with patch("app.emulators.manager.current_architecture", return_value="arm64"):
+                        found = resolve_emulator("mgba", root=Path(temporary) / "empty")
+                self.assertEqual(found, managed_executable.resolve())
+
     def test_unknown_emulator_is_not_available(self):
         self.assertFalse(emulator_status("not-real")["available"])
 
