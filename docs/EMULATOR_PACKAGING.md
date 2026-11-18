@@ -1,65 +1,77 @@
 # Emulator packaging and installation
 
-## Raspberry Pi OS 64-bit first
+## Product requirement
 
-RetroDeck's first supported automatic system-package installation target is
-Raspberry Pi OS / Debian-family Linux on ARM64. The app uses the system's
-configured APT repositories and asks the desktop authorization service before
-installing anything. It does not silently elevate privileges.
+RetroDeck should feel like a console setup, not a Linux maintenance task.
+Users should not need to open a terminal, run package-manager commands, find
+emulator downloads, set executable paths, or grant administrator access just
+to install an emulator.
 
-The first verified Debian ARM64 package set is:
+Managed emulator files belong in the user's application-data directory:
 
-| Emulator | Systems | Debian package | Status |
-| --- | --- | --- | --- |
-| Dolphin | GameCube and Wii | `dolphin-emu` | Package available for Debian 13 ARM64 |
-| mGBA | Game Boy, Game Boy Color, GBA | `mgba-qt` | Package available for Debian 13 ARM64 |
-| Nestopia | NES | `nestopia` | Package available for Debian 13 ARM64 |
-| Mupen64Plus | Nintendo 64 | None in Debian 13 ARM64 | Requires a separately validated ARM64 build |
-| bsnes | SNES | Not yet selected | Package/build verification required |
-| melonDS | Nintendo DS | Not yet selected | Standalone ARM64 package verification required |
-| PPSSPP | PSP | Not yet selected | Package/build verification required |
+- Linux: `~/.local/share/RetroDeck/emulators/` (or `$XDG_DATA_HOME`)
+- Windows: `%LOCALAPPDATA%/RetroDeck/emulators/`
+- macOS: `~/Library/Application Support/RetroDeck/emulators/`
 
-The APT package names above are fixed in code. RetroDeck runs
-`pkexec apt-get install` only after the user confirms the install action.
-The package manager handles dependencies and system updates. RetroDeck does
-not download arbitrary binaries or run downloaded scripts.
+The ROM library remains separate and is never modified by emulator installation.
 
-## Executable discovery
+## Managed package architecture
 
-Bundled builds use this layout:
+`app/emulators/managed_installer.py` provides the first implementation of
+the package installation engine:
 
-```text
-emulators/bin/<platform>/<architecture>/<executable>
-```
+- Reads a versioned JSON package manifest.
+- Accepts HTTPS downloads only from explicitly approved hosts.
+- Requires a pinned SHA-256 digest before any archive is extracted.
+- Streams downloads to a temporary directory.
+- Extracts ZIP and tar archives while rejecting path traversal, links, and
+  special files.
+- Installs into a per-user versioned directory without administrator rights.
+- Marks Linux AppImages and executable files as executable.
+- Keeps incomplete or checksum-failing downloads out of the installed path.
+- Uses atomic directory movement after verification.
 
-The resolver also checks the older `emulators/bin/<platform>/` location for
-backwards compatibility, Debian's `/usr/games`, `/usr/bin`, and
-`/usr/local/bin`, then checks the system PATH. This permits distro
-packages to work without copying their files into the RetroDeck repository.
+The executable resolver checks RetroDeck's per-user managed directory before
+legacy project folders and system-installed executables.
 
-## Important limitations
+## Package approval policy
 
-- Installing a package does not prove that every game runs at full speed.
-  Each emulator still needs launch and controller testing on a Pi 5.
-- Debian 13's Mupen64Plus console package is not built for ARM64. Do not offer
-  it as an APT install on the Pi. A dedicated ARM64 build and its plugins must
-  be validated before N64 is marked installed.
-- Dolphin's package is a distro-maintained build. Its version can differ from
-  the upstream release.
-- Do not bundle commercial game files, console firmware, BIOS images, keys,
-  or copyrighted artwork. Users must provide any required files themselves.
-- Third-party license and notice obligations still apply to any binaries
-  redistributed directly by RetroDeck.
+A package is not eligible for the manifest merely because an upstream download
+exists. Before enabling an automatic install, RetroDeck must verify:
 
-## Current implementation
+1. The exact official upstream asset and release version.
+2. A trustworthy SHA-256 value or publisher signature.
+3. CPU architecture and operating-system compatibility.
+4. Runtime dependencies on the target Raspberry Pi OS release.
+5. The executable path and launch arguments.
+6. License, notices, and source-code obligations.
+7. A real launch smoke test on Raspberry Pi 5.
 
-- Architecture-aware executable discovery.
-- Fixed Debian ARM64 package plan for Dolphin, mGBA, and Nestopia.
-- Explicit privileged APT install command, only after UI confirmation.
-- Unit tests for platform filtering, package names, and launch discovery.
+The current manifest is intentionally empty. This prevents RetroDeck from
+silently offering an unverified binary. The official mGBA project publishes
+an ARM64 AppImage, and Dolphin publishes ARM64 Linux builds, but their runtime
+requirements and package hashes still need to be pinned and tested before
+they become one-click installs.
 
-Still required:
-- Run the installer on a real Raspberry Pi 5.
-- Confirm the actual installed executable paths and launch arguments.
-- Test representative games and controller mappings.
-- Build and validate a native ARM64 Mupen64Plus package.
+## Current status
+
+Implemented:
+- Per-user emulator application-data paths.
+- Manifest validation and approved-host checks.
+- SHA-256 verification before installation.
+- Safe ZIP and tar extraction.
+- Atomic versioned installation.
+- Managed-install discovery by the game launcher.
+- Unit tests for validation, path traversal protection, and verified install.
+
+Not yet complete:
+- Populate the manifest with reviewed Pi 5 ARM64 builds.
+- Add a background download worker and progress display.
+- Add first-run setup that installs the compatible emulator set automatically.
+- Add update, repair, rollback, and removal controls.
+- Validate each emulator with actual games and controller input on Raspberry Pi 5.
+- Add Windows x64 packages after the Pi experience is reliable.
+
+No ROMs, BIOS images, firmware, encryption keys, or copyrighted artwork are
+downloaded or bundled by RetroDeck. Users supply any legally required game
+files and firmware themselves.
