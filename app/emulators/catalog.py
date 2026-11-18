@@ -19,7 +19,6 @@ EMULATOR_CATALOG = {
         "license_status": "source-and-notice-review-required",
         "executables": {"linux": ["dolphin-emu", "dolphin"], "windows": ["Dolphin.exe"]},
         "arguments": ["-e", "{rom}"],
-        "debian_arm64_packages": ["dolphin-emu"],
     },
     "nestopia": {
         "name": "Nestopia", "systems": ["Nintendo Entertainment System"],
@@ -28,7 +27,6 @@ EMULATOR_CATALOG = {
         "license_status": "review-required",
         "executables": {"linux": ["nestopia"], "windows": ["nestopia.exe"]},
         "arguments": ["{rom}"],
-        "debian_arm64_packages": ["nestopia"],
     },
     "bsnes": {
         "name": "bsnes", "systems": ["Super Nintendo"],
@@ -53,7 +51,6 @@ EMULATOR_CATALOG = {
         "license_status": "source-and-notice-review-required",
         "executables": {"linux": ["mgba", "mgba-qt"], "windows": ["mGBA.exe"]},
         "arguments": ["{rom}"],
-        "debian_arm64_packages": ["mgba-qt"],
     },
     "melonds": {
         "name": "melonDS", "systems": ["Nintendo DS"],
